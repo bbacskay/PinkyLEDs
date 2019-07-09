@@ -110,8 +110,8 @@ DEFINE_GRADIENT_PALETTE( Orange_to_Purple_gp ) {
   #define SPEEDTOPIC "speed"
   #define WHITE_VALUE "false"
 #endif
-#define mqttcommand "cmnd/" DEVICE_NAME 
-#define mqttstate "stat/" DEVICE_NAME 
+#define mqttcommand "cmnd/" DEVICE_NAME
+#define mqttstate "stat/" DEVICE_NAME
 #define LWTTOPIC "LWT/" DEVICE_NAME
 
 #ifdef USE_DISCOVERY
@@ -130,7 +130,7 @@ DEFINE_GRADIENT_PALETTE( Orange_to_Purple_gp ) {
   #else
     #define DISCOVERY_E131 ""
   #endif
-  #define DISCOVERY_PAYLOAD DISCOVERY_BASE DISCOVERY_E131 "] }" 
+  #define DISCOVERY_PAYLOAD DISCOVERY_BASE DISCOVERY_E131 "] }"
 
 #endif
 #ifdef ENABLE_E131
@@ -193,16 +193,16 @@ uint8_t bpm = 30;
 
 /**************FOR LIGHTNING**************/
 uint8_t frequency = 50;                                       // controls the interval between strikes
-uint8_t flashes = 8;                                          //the upper limit of flashes per strike
+uint8_t flashes = 8;                                          // the upper limit of flashes per strike
 unsigned int dimmer = 1;
 uint8_t ledstart;                                             // Starting location of a flash
 uint8_t ledlen;
 int lightningcounter = 0;
 
 /********FOR FUNKBOX EFFECTS**********/
-int idex = 0;                //-LED INDEX (0 to NUM_LEDS-1
+int idex = 0;                                                 // -LED INDEX (0 to NUM_LEDS-1
 int TOP_INDEX = int(NUM_LEDS / 2);
-int thissat = 255;           //-FX LOOPS DELAY VAR
+int thissat = 255;                                            // -FX LOOPS DELAY VAR
 
 //////////////////add thishue__ for Police All custom effects here/////////////////////////////////////////////////////////
 /////////////////use hsv Hue number for one color, for second color change "thishue__ + __" in the setEffect section//////
@@ -228,8 +228,9 @@ uint8_t gHue = 0;
 char message_buff[100];
 
 
-WiFiClient espClient; //this needs to be unique for each controller
-PubSubClient client(espClient); //this needs to be unique for each controller
+WiFiClient espClient;            // this needs to be unique for each controller
+PubSubClient client(espClient);  // this needs to be unique for each controller
+
 #ifdef ENABLE_E131
   ESPAsyncE131 e131(1);
 #endif
@@ -241,14 +242,14 @@ void setup() {
   pinMode(POWER_BUTTON_PIN, INPUT_PULLUP);
   pinMode(COLOR_BUTTON_PIN, INPUT_PULLUP);
   pinMode(EFFECT_BUTTON_PIN, INPUT_PULLUP);
-  #ifdef DEBUG 
+  #ifdef DEBUG
     Serial.println("GPIO Setup complete");
   #endif
   FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.setMaxPowerInVoltsAndMilliamps(12, 10000); //experimental for power management. Feel free to try in your own setup.
   FastLED.setBrightness(brightness);
-  #ifdef DEBUG 
-    Serial.println("FastLED initialised"); 
+  #ifdef DEBUG
+    Serial.println("FastLED initialised");
   #endif
   setupStripedPalette( CRGB::Red, CRGB::Red, CRGB::White, CRGB::White); //for CANDY CANE
   setupThxPalette( CRGB::OrangeRed, CRGB::Olive, CRGB::Maroon, CRGB::Maroon); //for Thanksgiving
@@ -263,8 +264,8 @@ void setup() {
   #endif
   fill_solid(leds, NUM_LEDS, CRGB(255, 0, 0)); //Startup LED Lights
   FastLED.show();
-  #ifdef DEBUG 
-    Serial.println("Initial setup complete - LEDs on RED"); 
+  #ifdef DEBUG
+    Serial.println("Initial setup complete - LEDs on RED");
   #endif
   setup_wifi();
   #ifdef DEBUG 
@@ -272,8 +273,8 @@ void setup() {
   #endif
   client.setServer(mqtt_server, 1883); //CHANGE PORT HERE IF NEEDED
   client.setCallback(callback);
-  #ifdef DEBUG 
-    Serial.println("MQTT Initialised"); 
+  #ifdef DEBUG
+    Serial.println("MQTT Initialised");
   #endif
   ArduinoOTA.setPort(OTAport);
   ArduinoOTA.setHostname(DEVICE_NAME);
@@ -308,8 +309,8 @@ void setup() {
     }
   });
   ArduinoOTA.begin();
-  #ifdef DEBUG 
-    Serial.println("OTA setup complete"); 
+  #ifdef DEBUG
+    Serial.println("OTA setup complete");
   #endif
   #ifdef ENABLE_E131
     e131.begin(E131_UNICAST);
@@ -355,7 +356,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     message[i] = (char)payload[i];
   }
   if (String(topic) == mqttstate){
-    Serial.println("State message - Unsubscribing from state topic"); 
+    Serial.println("State message - Unsubscribing from state topic");
     client.unsubscribe(mqttstate);
   }
   message[length] = '\0';
@@ -367,18 +368,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (!root.success()) {
     Serial.println("parseObject() failed");
   } else {
-    #ifdef DEBUG 
-      Serial.println("JSON message parsed succesfully"); 
+    #ifdef DEBUG
+      Serial.println("JSON message parsed succesfully");
     #endif
     if (root.containsKey("state")) {
       const char* power = root["state"];
       setPower = power;
-      #ifdef DEBUG 
-        Serial.print("Power set: "); 
-        Serial.println(setPower); 
+      #ifdef DEBUG
+        Serial.print("Power set: ");
+        Serial.println(setPower);
       #endif
     }
-  
+
     if (root.containsKey("color")) {
       setRed = root["color"]["r"];
       setGreen = root["color"]["g"];
@@ -395,57 +396,58 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
     if (root.containsKey("brightness")) {
       brightness = root["brightness"];
-      #ifdef DEBUG 
-        Serial.print("Brightness Set: "); 
-        Serial.println(brightness); 
+      #ifdef DEBUG
+        Serial.print("Brightness Set: ");
+        Serial.println(brightness);
       #endif
     }
 
     if (root.containsKey("effect")) {
       const char* newEffect = root["effect"];
       setEffect = newEffect;
-      #ifdef DEBUG 
+      #ifdef DEBUG
         Serial.print("Effect Set: ");
-        Serial.println(setEffect); 
+        Serial.println(setEffect);
       #endif
       if (setEffect == "E131") {
         FastLED.clear(true);
-        #ifdef DEBUG 
-          Serial.println("LEDs Cleared.  Ready for E1.31"); 
+        #ifdef DEBUG
+          Serial.println("LEDs Cleared.  Ready for E1.31");
         #endif
       }
       if ((setEffect == "Twinkle")||(setEffect == "Lightning")) {
         twinklecounter = 0;
         #ifdef DEBUG
-          Serial.println("Twinkle Counter reset"); 
+          Serial.println("Twinkle Counter reset");
         #endif
       }
     }
 
     if (root.containsKey(SPEEDTOPIC)) {
       animationspeed = root[SPEEDTOPIC];
-      #ifdef DEBUG 
-        Serial.print("Speed Set: "); 
-        Serial.println(animationspeed); 
+      #ifdef DEBUG
+        Serial.print("Speed Set: ");
+        Serial.println(animationspeed);
       #endif
     }
 
     if (root.containsKey("flash")) {
       flashTime = (int)root["flash"] * 1000;
-      #ifdef DEBUG 
-        Serial.print("Flash Set: "); 
-        Serial.println(flashTime); 
+      #ifdef DEBUG
+        Serial.print("Flash Set: ");
+        Serial.println(flashTime);
       #endif
     }else{
       flashTime = 0;
-      #ifdef DEBUG 
-        Serial.println("Flash Set: Off"); 
+      #ifdef DEBUG
+        Serial.println("Flash Set: Off");
       #endif
     }
   }
   #ifdef DEBUG 
     Serial.println("Prepare to publish state..."); 
   #endif
+
   publishState();
   #ifdef DEBUG 
     Serial.println("MQTT command complete"); 
@@ -455,28 +457,29 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void publishState() {
   StaticJsonBuffer<250> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
-  #ifdef DEBUG 
-    Serial.print("Initialising JSON State Message... "); 
+  #ifdef DEBUG
+    Serial.println("Initialising JSON State Message... ");
   #endif
-  root["state"] = setPower; 
+
+  root["state"] = setPower;
   JsonObject& color = root.createNestedObject("color");
   color["r"] = setRed;
   color["g"] = setGreen;
   color["b"] = setBlue;
   root["brightness"] = brightness;
-  root["effect"] = setEffect; 
+  root["effect"] = setEffect;
   root[SPEEDTOPIC] = animationspeed;
   if (flashTime > 0){
     root["flash"] = flashTime / 1000;
   }
   char buffer[root.measureLength() + 1];
   root.printTo(buffer, sizeof(buffer));
-  #ifdef DEBUG 
+  #ifdef DEBUG
     Serial.println("Done");
   #endif
   client.publish(mqttstate, buffer, true);
-  #ifdef DEBUG 
-    Serial.println("State Sent"); 
+  #ifdef DEBUG
+    Serial.println("State Sent");
   #endif
 }
 
@@ -509,12 +512,12 @@ void loop() {
   } else
   #endif
   {
-  
+
     int Rcolor = setRed;
     int Gcolor = setGreen;
-    int Bcolor = setBlue; 
+    int Bcolor = setBlue;
     static bool flashOff = false;
-    
+
     if (setPower == "OFF") {
       //setEffect = "Solid";
       digitalWrite(LED_BUILTIN, HIGH);
@@ -758,7 +761,7 @@ void loop() {
           FastLED.clear();
           FastLED.show();
         }
-        
+
         ledstart = random8(NUM_LEDS);           // Determine starting location of flash
         ledlen = random8(NUM_LEDS - ledstart);  // Determine length of flash (not to go beyond NUM_LEDS-1)
         static unsigned int lightningFlashTime = 0;
@@ -847,7 +850,7 @@ void loop() {
           }
         }
       }
-      
+
       if (setEffect == "Fire") {
         Fire2012WithPalette();
       }
@@ -902,7 +905,7 @@ void loop() {
       FastLED.setBrightness(brightness);  //EXECUTE EFFECT COLOR
       FastLED.show();
     }
-    
+
     if (setPower == "OFF"){
       FastLED.delay(10);
     } else {
@@ -1029,20 +1032,20 @@ void reconnect() {
         client.beginPublish(DISCOVERY_TOPIC,sizeof(b)-1,true);//){;
         client.write(b,sizeof(b)-1);
         client.endPublish();
-        #ifdef DEBUG 
-          Serial.println("Discovery message sent"); 
+        #ifdef DEBUG
+          Serial.println("Discovery message sent");
         #endif
       #endif
       client.subscribe(mqttcommand);
       client.subscribe(mqtt_group_topic);
-      #ifdef DEBUG 
+      #ifdef DEBUG
         Serial.println("Subscribed to MQTT topics");
       #endif
       if (startupMQTTconnect) {
         client.subscribe(mqttstate);
         startupMQTTconnect = false;
         #ifdef DEBUG
-          Serial.println("Subscribed to MQTT State topic"); 
+          Serial.println("Subscribed to MQTT State topic");
         #endif
         fill_solid(leds, NUM_LEDS, CRGB(0, 255, 0));
         FastLED.show();
@@ -1052,8 +1055,8 @@ void reconnect() {
         delay(250);
       } else {
         publishState();
-        #ifdef DEBUG 
-          Serial.println("State published"); 
+        #ifdef DEBUG
+          Serial.println("State published");
         #endif
       }
     } else {
@@ -1065,7 +1068,7 @@ void reconnect() {
         FastLED.clear(true);
         FastLED.show();
         delay(250);
-      } 
+      }
     }
   }
 }

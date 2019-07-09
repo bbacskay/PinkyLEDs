@@ -717,7 +717,7 @@ void loop() {
         }
       }
 
-      if (setEffect == "Solid" & setPower == "ON" ) {          //Fill entire strand with solid color
+      if ( (setEffect == "Solid") && (setPower == "ON") ) {          //Fill entire strand with solid color
         fill_solid(leds, NUM_LEDS, CRGB(Rcolor, Gcolor, Bcolor));
       }
 

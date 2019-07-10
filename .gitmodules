@@ -1,0 +1,15 @@
+[submodule "libraries/FastLED"]
+	path = libraries/FastLED
+	url = https://github.com/FastLED/FastLED.git
+[submodule "libraries/PubSubClient"]
+	path = libraries/PubSubClient
+	url = https://github.com/knolleary/pubsubclient.git
+[submodule "libraries/ArduinoJson"]
+	path = libraries/ArduinoJson
+	url = https://github.com/bblanchon/ArduinoJson.git
+[submodule "libraries/ESPAsyncE131"]
+	path = libraries/ESPAsyncE131
+	url = https://github.com/forkineye/ESPAsyncE131.git
+[submodule "libraries/ESPAsyncUDP"]
+	path = libraries/ESPAsyncUDP
+	url = https://github.com/me-no-dev/ESPAsyncUDP.git

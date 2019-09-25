@@ -36,18 +36,16 @@ void Effect::resetStrip() const
   FastLED.show();
 }
 
-//#pragma endregion class_Effect
 
 
-//#pragma region class_EffectConfetti
-// Constructor of class_EffectConfetti class
+// Constructor of EffectConfetti class
 EffectConfetti::EffectConfetti(CRGB leds[], uint8_t& Rcolor, uint8_t& Gcolor, uint8_t& Bcolor)
 	: Effect(leds), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
 {
 	Serial.println("EffectConfetti constructor called");
 }
 
-// Destructor of class_EffectConfetti class
+// Destructor of EffectConfetti class
 EffectConfetti::~EffectConfetti()
 {
 
@@ -61,14 +59,14 @@ void EffectConfetti::loop()
 }
 
 
-// Constructor of class_EffectGlitter class
-EffectGlitter::EffectGlitter(CRGB leds[])
-	: Effect(leds)
+// Constructor of EffectGlitter class
+EffectGlitter::EffectGlitter(CRGB leds[], uint8_t& Rcolor, uint8_t& Gcolor, uint8_t& Bcolor)
+	: Effect(leds), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
 {
 	Serial.println("EffectGlitter constructor called");
 }
 
-// Destructor of class_EffectGlitter class
+// Destructor of EffectGlitter class
 EffectGlitter::~EffectGlitter()
 {
 
@@ -87,14 +85,14 @@ void EffectGlitter::loop()
   addGlitterColor(80, Rcolor, Gcolor, Bcolor);
 }
 
-// Constructor of class_EffectJuggle class
-EffectJuggle::EffectJuggle(CRGB leds[])
-	: Effect(leds)
+// Constructor of EffectJuggle class
+EffectJuggle::EffectJuggle(CRGB leds[], uint8_t& Rcolor, uint8_t& Gcolor, uint8_t& Bcolor)
+	: Effect(leds), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
 {
 	Serial.println("class_EffectJuggle constructor called");
 }
 
-// Destructor of class_EffectJuggle class
+// Destructor of EffectJuggle class
 EffectJuggle::~EffectJuggle()
 {
 
@@ -111,14 +109,14 @@ void EffectJuggle::loop()
 }
 
 
-// Constructor of class_EffectSolid class
-EffectSolid::EffectSolid(CRGB leds[])
-	: Effect(leds)
+// Constructor of EffectSolid class
+EffectSolid::EffectSolid(CRGB leds[], uint8_t& Rcolor, uint8_t& Gcolor, uint8_t& Bcolor)
+	: Effect(leds), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
 {
 	Serial.println("class_EffectSolid constructor called");
 }
 
-// Destructor of class_EffectSolid class
+// Destructor of EffectSolid class
 EffectSolid::~EffectSolid()
 {
 
@@ -130,14 +128,14 @@ void EffectSolid::loop()
 }
 
 
-// Constructor of class_EffectSinelon class
-EffectSinelon::EffectSinelon(CRGB leds[])
-	: Effect(leds)
+// Constructor of EffectSinelon class
+EffectSinelon::EffectSinelon(CRGB leds[], uint8_t& Rcolor, uint8_t& Gcolor, uint8_t& Bcolor)
+	: Effect(leds), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
 {
 	Serial.println("class_EffectSinelon constructor called");
 }
 
-// Destructor of class_EffectSinelon class
+// Destructor of EffectSinelon class
 EffectSinelon::~EffectSinelon()
 {
 
@@ -153,8 +151,8 @@ void EffectSinelon::loop()
 
 //#pragma region class_EffectChristmas
 // Constructor of EffectChristmas class
-EffectChristmas::EffectChristmas(CRGB leds[])
-	: Effect(leds), gHue(0)
+EffectChristmas::EffectChristmas(CRGB leds[], uint8_t& gHue )
+	: Effect(leds), gHue(gHue)
 {
 	Serial.println("EffectChristmas constructor called");
 }
@@ -287,8 +285,8 @@ void EffectLoveyDay::loop()
 
 //#pragma region class_EffectStPatty
 // Constructor of EffectStPatty class
-EffectStPatty::EffectStPatty(CRGB leds[])
-	: Effect(leds), gHue(0)
+EffectStPatty::EffectStPatty(CRGB leds[], uint8_t& gHue)
+	: Effect(leds), gHue(gHue)
 {
 	Serial.println("EffectStPatty constructor called");
 }
@@ -320,8 +318,8 @@ void EffectStPatty::loop()
 
 
 // Constructor of EffectValentine class
-EffectValentine::EffectValentine(CRGB leds[])
-	: Effect(leds), gHue(0)
+EffectValentine::EffectValentine(CRGB leds[], uint8_t& gHue)
+	: Effect(leds), gHue(gHue)
 {
 	Serial.println("EffectValentine constructor called");
 }
@@ -356,8 +354,8 @@ void EffectValentine::loop()
 
 
 // Constructor of EffectTurkeyDay class
-EffectTurkeyDay::EffectTurkeyDay(CRGB leds[])
-	: Effect(leds), gHue(0)
+EffectTurkeyDay::EffectTurkeyDay(CRGB leds[], uint8_t& gHue)
+	: Effect(leds), gHue(gHue)
 {
 	Serial.println("EffectTurkeyDay constructor called");
 }
@@ -424,8 +422,8 @@ void EffectThanksgiving::loop()
 
 
 // Constructor of EffectUsa class
-EffectUsa::EffectUsa(CRGB leds[])
-	: Effect(leds), gHue(0)
+EffectUsa::EffectUsa(CRGB leds[], uint8_t& gHue)
+	: Effect(leds), gHue(gHue)
 {
 	Serial.println("EffectUsa constructor called");
 }
@@ -492,8 +490,8 @@ void EffectIndependence::loop()
 
 
 // Constructor of EffectGoBlue class
-EffectGoBlue::EffectGoBlue(CRGB leds[])
-	: Effect(leds), gHue(0)
+EffectGoBlue::EffectGoBlue(CRGB leds[], uint8_t& gHue)
+	: Effect(leds), gHue(gHue)
 {
 
   Serial.println("EffectGoBlue constructor called");
@@ -582,8 +580,8 @@ void EffectTouchdown::loop()
 
 
 // Constructor of EffectHalloween class
-EffectHalloween::EffectHalloween(CRGB leds[])
-	: Effect(leds), gHue(0)
+EffectHalloween::EffectHalloween(CRGB leds[], uint8_t& gHue)
+	: Effect(leds), gHue(gHue)
 {
 
   Serial.println("EffectHalloween constructor called");
@@ -646,8 +644,8 @@ void EffectPunkin::loop()
 
 
 // Constructor of EffectBpm class
-EffectBpm::EffectBpm(CRGB leds[])
-	: Effect(leds), gHue(0)
+EffectBpm::EffectBpm(CRGB leds[], uint8_t& gHue)
+	: Effect(leds), gHue(gHue)
 {
 	Serial.println("EffectBpm constructor called");
 }
@@ -705,8 +703,8 @@ void EffectCyclonRainbow::loop()
 
 
 // Constructor of EffectDots class
-EffectDots::EffectDots(CRGB leds[])
-	: Effect(leds)
+EffectDots::EffectDots(CRGB leds[], uint8_t& bpm, uint8_t& fadeval)
+	: Effect(leds), bpm(bpm), fadeval(fadeval)
 {
 	Serial.println("EffectDots constructor called");
 }
@@ -742,8 +740,8 @@ EffectLightning::~EffectLightning()
 
 void EffectLightning::loop()
 {
-  ledstart = random8(NUM_LEDS);           // Determine starting location of flash
-  ledlen = random8(NUM_LEDS - ledstart);  // Determine length of flash (not to go beyond NUM_LEDS-1)
+  ledstart = random16(NUM_LEDS);           // Determine starting location of flash
+  ledlen = random16(NUM_LEDS - ledstart);  // Determine length of flash (not to go beyond NUM_LEDS-1)
   
   if (millis() - lightningFlashTime >= lightningFlashDelay){
     for (int lightningFlashCounter = 0; lightningFlashCounter < random8(3, flashes); lightningFlashCounter++) {

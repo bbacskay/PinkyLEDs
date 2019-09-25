@@ -38,32 +38,32 @@ private:
 class EffectGlitter : public Effect
 {
 public:
-  EffectGlitter(CRGB leds[]);
+  EffectGlitter(CRGB leds[], uint8_t&, uint8_t&, uint8_t&);
   virtual ~EffectGlitter();
   void loop();
 
-  uint8_t Rcolor;
-  uint8_t Gcolor;
-  uint8_t Bcolor;
 
 private:
   void addGlitterColor( fract8 chanceOfGlitter, const int Rcolor, const int Gcolor, const int Bcolor) const;
 
+  uint8_t& Rcolor;
+  uint8_t& Gcolor;
+  uint8_t& Bcolor;
+  
 };
 
 
-class EffectJuggle : public Effect
+class EffectJuggle : public Effect 
 {
 public:
-  EffectJuggle(CRGB leds[]);
+  EffectJuggle(CRGB leds[], uint8_t&, uint8_t&, uint8_t&);
   virtual ~EffectJuggle();
   void loop();
 
-  uint8_t Rcolor;
-  uint8_t Gcolor;
-  uint8_t Bcolor;
-
 private:
+  uint8_t& Rcolor;
+  uint8_t& Gcolor;
+  uint8_t& Bcolor;
 
 };
 
@@ -71,15 +71,14 @@ private:
 class EffectSinelon : public Effect
 {
 public:
-  EffectSinelon(CRGB leds[]);
+  EffectSinelon(CRGB leds[], uint8_t&, uint8_t&, uint8_t&);
   virtual ~EffectSinelon();
   void loop();
 
-  uint8_t Rcolor;
-  uint8_t Gcolor;
-  uint8_t Bcolor;
-
 private:
+  uint8_t& Rcolor;
+  uint8_t& Gcolor;
+  uint8_t& Bcolor;
 
 };
 
@@ -87,15 +86,14 @@ private:
 class EffectSolid : public Effect
 {
 public:
-  EffectSolid(CRGB leds[]);
+  EffectSolid(CRGB leds[], uint8_t&, uint8_t&, uint8_t&);
   virtual ~EffectSolid();
   void loop();
 
-  uint8_t Rcolor;
-  uint8_t Gcolor;
-  uint8_t Bcolor;
-
 private:
+  uint8_t& Rcolor;
+  uint8_t& Gcolor;
+  uint8_t& Bcolor;
 
 };
 
@@ -103,13 +101,12 @@ private:
 class EffectChristmas : public Effect
 {
 public:
-  EffectChristmas(CRGB leds[]);
+  EffectChristmas(CRGB leds[], uint8_t&);
   virtual ~EffectChristmas();
   void loop();
 
-  uint8_t gHue;
-
 private:
+  uint8_t& gHue;
 
 };
 
@@ -162,39 +159,36 @@ private:
 class EffectStPatty : public Effect
 {
 public:
-  EffectStPatty(CRGB leds[]);
+  EffectStPatty(CRGB leds[], uint8_t&);
   virtual ~EffectStPatty();
   void loop();
 
-  uint8_t gHue;
-
 private:
+  uint8_t& gHue;
 
 };
 
 class EffectUsa : public Effect
 {
 public:
-  EffectUsa(CRGB leds[]);
+  EffectUsa(CRGB leds[], uint8_t&);
   virtual ~EffectUsa();
   void loop();
 
-  uint8_t gHue;
-
 private:
+  uint8_t& gHue;
 
 };
 
 class EffectValentine : public Effect
 {
 public:
-  EffectValentine(CRGB leds[]);
+  EffectValentine(CRGB leds[], uint8_t&);
   virtual ~EffectValentine();
   void loop();
 
-  uint8_t gHue;
-
 private:
+  uint8_t& gHue;
 
 };
 
@@ -216,13 +210,12 @@ private:
 class EffectGoBlue : public Effect
 {
 public:
-  EffectGoBlue(CRGB leds[]);
+  EffectGoBlue(CRGB leds[], uint8_t&);
   virtual ~EffectGoBlue();
   void loop();
 
-  uint8_t gHue;
-
 private:
+    uint8_t& gHue;
 
 };
 
@@ -261,13 +254,12 @@ private:
 class EffectHalloween : public Effect
 {
 public:
-  EffectHalloween(CRGB leds[]);
+  EffectHalloween(CRGB leds[], uint8_t&);
   virtual ~EffectHalloween();
   void loop();
 
-  uint8_t gHue;
-
 private:
+  uint8_t& gHue;
 
 };
 
@@ -275,13 +267,12 @@ private:
 class EffectTurkeyDay : public Effect
 {
 public:
-  EffectTurkeyDay(CRGB leds[]);
+  EffectTurkeyDay(CRGB leds[], uint8_t&);
   virtual ~EffectTurkeyDay();
   void loop();
 
-  uint8_t gHue;
-
 private:
+  uint8_t& gHue;
 
 };
 
@@ -321,13 +312,12 @@ private:
 class EffectBpm : public Effect
 {
 public:
-  EffectBpm(CRGB leds[]);
+  EffectBpm(CRGB leds[], uint8_t&);
   virtual ~EffectBpm();
   void loop();
 
-  uint8_t gHue;
-
 private:
+  uint8_t& gHue;
 
 };
 
@@ -350,16 +340,13 @@ private:
 class EffectDots : public Effect
 {
 public:
-  EffectDots(CRGB leds[]);
+  EffectDots(CRGB leds[], uint8_t&, uint8_t&);
   virtual ~EffectDots();
   void loop();
 
-  uint8_t bpm;
-  uint8_t fadeval;
-
-
 private:
-
+  uint8_t& bpm;
+  uint8_t& fadeval;
 
 };
 
@@ -373,8 +360,8 @@ public:
 
 
 private:
-  uint8_t ledstart;                  // Starting location of a flash
-  uint8_t ledlen;
+  uint16_t ledstart;                  // Starting location of a flash
+  uint16_t ledlen;
   unsigned int lightningFlashTime;
   unsigned int lightningFlashDelay;
   unsigned int dimmer;

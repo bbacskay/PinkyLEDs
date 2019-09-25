@@ -172,9 +172,6 @@ uint8_t deltahue = 10;
 uint8_t fadeval = 224;                                        // Trail behind the LED's. Lower => faster fade.
 uint8_t bpm = 30;
 
-/**************FOR LIGHTNING**************/
-int lightningcounter = 0;
-
 
 //////////////////add thishue__ for Police All custom effects here/////////////////////////////////////////////////////////
 /////////////////use hsv Hue number for one color, for second color change "thishue__ + __" in the setEffect section//////
@@ -202,28 +199,28 @@ long lastReconnectAttempt = 0;
 
 // Define effects
 EffectConfetti       effectConfetti(leds, Rcolor, Gcolor, Bcolor);
-EffectGlitter        effectGlitter(leds);
-EffectJuggle         effectJuggle(leds);
-EffectSinelon        effectSinelon(leds);
-EffectSolid          effectSolid(leds);
-EffectChristmas      effectChristmas(leds);
+EffectGlitter        effectGlitter(leds, Rcolor, Gcolor, Bcolor);
+EffectJuggle         effectJuggle(leds, Rcolor, Gcolor, Bcolor);
+EffectSinelon        effectSinelon(leds, Rcolor, Gcolor, Bcolor);
+EffectSolid          effectSolid(leds, Rcolor, Gcolor, Bcolor);
+EffectChristmas      effectChristmas(leds, gHue);
 EffectCandyCane      effectCandyCane(leds);
 EffectHollyJolly     effectHollyJolly(leds);
-EffectValentine      effectValentine(leds);
+EffectValentine      effectValentine(leds, gHue);
 EffectLoveyDay       effectLoveyDay(leds);
-EffectStPatty        effectStPatty(leds);
-EffectUsa            effectUsa(leds);
+EffectStPatty        effectStPatty(leds, gHue);
+EffectUsa            effectUsa(leds, gHue);
 EffectIndependence   effectIndependence(leds);
-EffectGoBlue         effectGoBlue(leds);
+EffectGoBlue         effectGoBlue(leds, gHue);
 EffectHail           effectHail(leds);
 EffectTouchdown      effectTouchdown(leds);
-EffectHalloween      effectHalloween(leds);
-EffectTurkeyDay      effectTurkeyDay(leds);
+EffectHalloween      effectHalloween(leds, gHue);
+EffectTurkeyDay      effectTurkeyDay(leds, gHue);
 EffectPunkin         effectPunkin(leds);
 EffectThanksgiving   effectThanksgiving(leds);
-EffectBpm            effectBpm(leds);
+EffectBpm            effectBpm(leds, gHue);
 EffectCyclonRainbow  effectCyclonRainbow(leds);
-EffectDots           effectDots(leds);
+EffectDots           effectDots(leds, bpm, fadeval);
 EffectLightning      effectLightning(leds);
 EffectPoliceAll      effectPoliceAll(leds);
 EffectPoliceOne      effectPoliceOne(leds);
@@ -846,35 +843,22 @@ void loop()
           break;
 
         case eEffects::Glitter:                    // glitter effect
-          effectGlitter.Rcolor = Rcolor;
-          effectGlitter.Gcolor = Gcolor;
-          effectGlitter.Bcolor = Bcolor;
           effectGlitter.loop();
           break;
 
         case eEffects::Juggle:                     // eight colored dots, weaving in and out of sync with each other
-          effectJuggle.Rcolor = Rcolor;
-          effectJuggle.Gcolor = Gcolor;
-          effectJuggle.Bcolor = Bcolor;
           effectJuggle.loop();
           break;
 
         case eEffects::Sinelon:
-          effectSinelon.Rcolor = Rcolor;
-          effectSinelon.Gcolor = Gcolor;
-          effectSinelon.Bcolor = Bcolor;
           effectSinelon.loop();
           break;
 
         case eEffects::Solid:                      // Fill entire strand with solid color
-          effectSolid.Rcolor = Rcolor;
-          effectSolid.Gcolor = Gcolor;
-          effectSolid.Bcolor = Bcolor;
           effectSolid.loop();
           break;
 
         case eEffects::Christmas:                  // colored stripes pulsing in Shades of GREEN and RED
-          effectChristmas.gHue = gHue;
           effectChristmas.loop();
           break;
 
@@ -887,7 +871,6 @@ void loop()
           break;
 
         case eEffects::Valentine:                  // colored stripes pulsing in Shades of PINK and RED
-          effectValentine.gHue = gHue;
           effectValentine.loop();
           break;
 
@@ -896,12 +879,10 @@ void loop()
           break;
 
         case eEffects::StPatty:                    // colored stripes pulsing in Shades of GREEN
-          effectStPatty.gHue = gHue;
           effectStPatty.loop();
           break;
 
         case eEffects::Usa:                        // colored stripes pulsing in Shades of Red White & Blue
-          effectUsa.gHue = gHue;
           effectUsa.loop();
           break;
 
@@ -910,7 +891,6 @@ void loop()
           break;
 
         case eEffects::GoBlue:
-          effectGoBlue.gHue = gHue;
           effectGoBlue.loop();
           break;
 
@@ -923,7 +903,6 @@ void loop()
           break;
 
         case eEffects::Halloween:                  // colored stripes pulsing in Shades of Purple and Orange
-          effectHalloween.gHue = gHue;
           effectHalloween.loop();
           break;
 
@@ -936,12 +915,10 @@ void loop()
           break;
 
         case eEffects::TurkeyDay:                  // colored stripes pulsing in Shades of Brown and ORANGE
-          effectTurkeyDay.gHue = gHue;
           effectTurkeyDay.loop();
           break;
 
         case eEffects::Bpm:                        // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-          effectBpm.gHue = gHue;
           effectBpm.loop();
           break;
 
@@ -950,8 +927,6 @@ void loop()
           break;
 
         case eEffects::Dots:
-          effectDots.bpm = bpm;
-          effectDots.fadeval = fadeval;
           effectDots.loop();
           break;
 

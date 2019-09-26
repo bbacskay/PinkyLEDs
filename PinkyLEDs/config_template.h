@@ -1,3 +1,5 @@
+#pragma once
+
 #define DEVICE_NAME "PinkyLED1" // Unique name for this device
 #define USE_DISCOVERY // remove if you do not want to use auto-discovery
 #define USE_WHITE_BALANCE_FOR_SPEED // remove if you do not want to use Home Assistant's built in white balance slider for animation speed
@@ -6,7 +8,8 @@
 #define wifi_ssid "yourSSID" // your WIFI SSID
 #define wifi_password "yourWiFiPassword" // your WIFI Password
 
-#define mqtt_server "IP_Address" // your MQTT broker address or IP.
+#define mqtt_server "IP_Address" // your MQTT broker hostname or IP.
+#define MQTT_PORT 1883
 #define mqtt_user "MQTT_USER" //enter your MQTT username
 #define mqtt_password "MQTTPASSWORD" //enter your MQTT password
 #define mqtt_group_topic "cmnd/PinkyLEDs" // MQTT group topic to allow controlling multiple controllers with a single mqtt command
@@ -31,3 +34,5 @@
 #define OTApassword "OTApassword" //the password you will need to enter to upload remotely via the ArduinoIDE
 
 #define CHANNEL_START 1  // number of first channel for E1.31
+
+//#define DEBUG 1

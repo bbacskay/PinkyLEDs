@@ -1,5 +1,7 @@
-# PinkyLEDs
+# PinkyLEDs v 0.8.0
 ## MQTT and E1.31 pixel driver for ESP8266 on D1 mini
+
+**BREAKING CHANGE - MQTT Library has been changed - please see below**
 
 Originally forked from: https://github.com/Snipercaine/Holiday-LED-files.  This was expanded to add buttons to control on/off, colour selection, and effect selection (at the request of my daughter who likes to have as many ways to control anything as possible!!)
 ### Features:
@@ -24,7 +26,8 @@ It should be possible to run this on other ESP8266 boards, but other changes may
 Additional libraries which you will require are:
 * ESP8266 Boards Latest version (installed to arduinoIDE in boards manager
 * ArduinoJson version 5 (I'm using version 5.13.5) (Will not work with version 6)
-* PubSubClient Latest version
+* [Arduino-MQTT by Joel Gaehwiler latest version](https://github.com/256dpi/arduino-mqtt)
+* ~~PubSubClient Latest version~~
 * FastLED Latest version (3.3.2)
 * ESPAsyncE131 Latest version
 * ESPAsyncUDP (required by ESPAsyncE131)

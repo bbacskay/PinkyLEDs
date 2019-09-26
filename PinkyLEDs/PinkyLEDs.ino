@@ -232,9 +232,9 @@ uint8_t gHue = 0;
 char message_buff[100];
 
 
-WiFiClient espClient; //this needs to be unique for each controller
+WiFiClient espClient; 
 MQTTClient client(1024);
-//PubSubClient client(espClient); //this needs to be unique for each controller
+
 #ifdef ENABLE_E131
   ESPAsyncE131 e131(1);
 #endif

@@ -1,6 +1,6 @@
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
-#include <PubSubClient.h>
+#include <MQTT.h>
 #define FASTLED_ALLOW_INTERRUPTS 0
 // #define FASTLED_INTERRUPT_RETRY_COUNT 0
 #include <FastLED.h>
@@ -233,7 +233,8 @@ char message_buff[100];
 
 
 WiFiClient espClient; //this needs to be unique for each controller
-PubSubClient client(espClient); //this needs to be unique for each controller
+MQTTClient client(1024);
+//PubSubClient client(espClient); //this needs to be unique for each controller
 #ifdef ENABLE_E131
   ESPAsyncE131 e131(1);
 #endif
@@ -274,8 +275,9 @@ void setup() {
   #ifdef DEBUG 
     Serial.println("WiFi Setup complete"); 
   #endif
-  client.setServer(mqtt_server, 1883); //CHANGE PORT HERE IF NEEDED
-  client.setCallback(callback);
+  client.begin(mqtt_server, 1883, espClient);
+  client.setWill(LWTTOPIC, "Offline", true, 0);
+  client.onMessage(callback);
   #ifdef DEBUG 
     Serial.println("MQTT Initialised"); 
   #endif
@@ -352,21 +354,16 @@ void setup_wifi() {
   }
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {
-  char message[length + 1];
-  Serial.print("MQTT message received ");
-  for (int i = 0; i < length; i++) {
-    message[i] = (char)payload[i];
-  }
+void callback(String &topic, String &payload) {
   if (String(topic) == mqttstate){
     Serial.println("State message - Unsubscribing from state topic"); 
     client.unsubscribe(mqttstate);
   }
-  message[length] = '\0';
-  Serial.println(message);
 
+  Serial.println(payload);
+  
   StaticJsonBuffer<250> jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(message);
+  JsonObject& root = jsonBuffer.parseObject(payload);
 
   if (!root.success()) {
     Serial.println("parseObject() failed");
@@ -478,7 +475,7 @@ void publishState() {
   #ifdef DEBUG 
     Serial.println("Done");
   #endif
-  client.publish(mqttstate, buffer, true);
+  client.publish(mqttstate, buffer, true, 0);
   #ifdef DEBUG 
     Serial.println("State Sent"); 
   #endif
@@ -487,9 +484,7 @@ void publishState() {
 void loop() {
 
   if (!client.connected()) {
-    Serial.println("MQTT Disconnected...");
     reconnect();
-    Serial.println("MQTT Connection attempt complete");
   } else {
     client.loop();
   }
@@ -1019,20 +1014,16 @@ void addGlitterColor( fract8 chanceOfGlitter, int Rcolor, int Gcolor, int Bcolor
   }
 }
 
-
 void reconnect() {
   static unsigned long mqttReconnectMillis = 0;
   if (millis() - mqttReconnectMillis >= 5000) {
     mqttReconnectMillis = millis();
     Serial.print("Attempting MQTT connection...");
-    if (client.connect(DEVICE_NAME, mqtt_user, mqtt_password, LWTTOPIC, 0, true, "Offline")) { //)) {
+    if (client.connect(DEVICE_NAME, mqtt_user, mqtt_password)) {
       Serial.println("connected");
-      client.publish(LWTTOPIC, "Online", true);
+      client.publish(LWTTOPIC, "Online", true,0);
       #ifdef USE_DISCOVERY
-        byte b[] = DISCOVERY_PAYLOAD;
-        client.beginPublish(DISCOVERY_TOPIC,sizeof(b)-1,true);//){;
-        client.write(b,sizeof(b)-1);
-        client.endPublish();
+        client.publish(DISCOVERY_TOPIC, DISCOVERY_PAYLOAD, true, 0);
         #ifdef DEBUG 
           Serial.println("Discovery message sent"); 
         #endif
@@ -1061,9 +1052,7 @@ void reconnect() {
         #endif
       }
     } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
+      Serial.println("failed... retry again in 5 seconds");
       if (startupMQTTconnect) {
         startupMQTTconnect = false;
         FastLED.clear(true);

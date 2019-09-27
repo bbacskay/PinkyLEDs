@@ -29,6 +29,8 @@
   #define OFF HIGH
 #endif
 
+#define VERSION "0.7.0"
+
 int OTAport = 8266;
 
 const CRGB colorList[] = {{255,0,0}, {0,255,0}, {0,0,255}, {0,255,127}, {191,255,0},
@@ -96,18 +98,36 @@ const char effectList[][20] = { "Confetti",
 
 #ifdef USE_DISCOVERY
   #define DISCOVERY_TOPIC "homeassistant/light/" DEVICE_NAME "/config"
-  #define DISCOVERY_BASE "{ \"name\": \"" DEVICE_NAME "\", " \
+  #define DISCOVERY_BASE "{ \"unique_id\": \"PinkyLED_" DEVICE_NAME "\", " \
+                           "\"device\":{" \
+                            "\"identifiers\":\"" DEVICE_NAME "\", " \
+                            "\"model\": \"generic\", " \
+                            "\"manufacturer\": \"Pinkywafer\", " \
+                            "\"name\": \"" DEVICE_NAME "\", " \
+                            "\"sw_version\": \"" VERSION "\"" \
+                           "}, " \
+                           "\"name\": \"" DEVICE_NAME "\", " \
                            "\"platform\": \"mqtt\", " \
                            "\"schema\": \"json\", " \
                            "\"state_topic\": \"" mqttstate "\", " \
-                           "\"command_topic\": \"" mqttcommand "\", \"white_value\": \"" WHITE_VALUE "\", \"optimistic\": \"false\", " \
-        "\"availability_topic\": \"" LWTTOPIC "\", \"payload_available\": \"Online\", \"payload_not_available\": \"Offline\", " \
-        "\"rgb\": \"true\", \"flash_time_short\": \"1\", \"flash_time_long\": \"5\", \"brightness\": \"true\", " \
-        "\"effect\": \"true\", \"effect_list\": [\"Confetti\", \"Glitter\", \"Juggle\", \"Sinelon\", \"Solid\", " \
-        "\"Christmas\", \"Candy Cane\", \"Holly Jolly\", \"Valentine\", \"Lovey Day\", \"St Patty\", \"Easter\", " \
-        "\"USA\", \"Independence\", \"Go Blue\", \"Hail\", \"Touchdown\", \"Halloween\", \"Punkin\", \"Thanksgiving\", " \
-        "\"Turkey Day\", \"BPM\", \"Cyclon Rainbow\", \"Dots\", \"Fire\", \"Lightning\", \"Police All\", \"Police One\", " \
-        "\"Rainbow\", \"Glitter Rainbow\", \"Ripple\", \"Twinkle\""
+                           "\"command_topic\": \"" mqttcommand "\", " \
+                           "\"white_value\": \"" WHITE_VALUE "\", " \
+                           "\"optimistic\": \"false\", " \
+                           "\"availability_topic\": \"" LWTTOPIC "\", " \
+                           "\"payload_available\": \"Online\", " \
+                           "\"payload_not_available\": \"Offline\", " \
+                           "\"rgb\": \"true\", " \
+                           "\"flash_time_short\": \"1\", " \
+                           "\"flash_time_long\": \"5\", " \
+                           "\"brightness\": \"true\", " \
+                           "\"effect\": \"true\", " \
+                           "\"effect_list\": [\"Confetti\", \"Glitter\", \"Juggle\", \"Sinelon\", \"Solid\", " \
+                                             "\"Christmas\", \"Candy Cane\", \"Holly Jolly\", \"Valentine\", \"Lovey Day\", " \
+                                             "\"St Patty\", \"Easter\", \"USA\", \"Independence\", \"Go Blue\", " \
+                                             "\"Hail\", \"Touchdown\", \"Halloween\", \"Punkin\", \"Thanksgiving\", " \
+                                             "\"Turkey Day\", \"BPM\", \"Cyclon Rainbow\", \"Dots\", \"Fire\", " \
+                                             "\"Lightning\", \"Police All\", \"Police One\", \"Rainbow\", \"Glitter Rainbow\", " \
+                                             "\"Ripple\", \"Twinkle\""
   #ifdef ENABLE_E131
     #define DISCOVERY_E131 ",\"E131\""
   #else

@@ -440,3 +440,22 @@ private:
   const uint8_t density;
 
 };
+
+
+/********FIRE**********/
+#define COOLING  55
+#define SPARKING 120
+
+class EffectFire : public Effect
+{
+public:
+  EffectFire(CRGB leds[]);
+  virtual ~EffectFire();
+  void loop();
+
+private:
+  bool gReverseDirection;
+  uint8_t heat[NUM_LEDS];  // Array of temperature readings at each simulation cell
+  CRGBPalette16 gPal;
+
+};

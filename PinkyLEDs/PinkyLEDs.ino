@@ -160,9 +160,6 @@ uint8_t Gcolor;
 uint8_t Bcolor;
 bool startupMQTTconnect = true;
 
-/****************FOR CANDY CANE-like desings***************/
-CRGBPalette16 HalloweenPalettestriped; //for Halloween
-CRGBPalette16 gPal; //for fire
 
 /****************FOR NOISE - I'm using this one for Easter***************/
 static uint16_t dist;         // A random number for our noise generator.
@@ -172,7 +169,6 @@ CRGBPalette16 targetPalette(OceanColors_p);
 CRGBPalette16 currentPalette(CRGB::Black);
 
 /*****************For TWINKLE********/
-#define DENSITY     80
 int twinklecounter = 0;
 
 /*********FOR RIPPLE***********/
@@ -197,10 +193,6 @@ uint8_t bpm = 30;
 /////////////////use hsv Hue number for one color, for second color change "thishue__ + __" in the setEffect section//////
 
 
-/********FIRE**********/
-#define COOLING  55
-#define SPARKING 120
-bool gReverseDirection = false;
 
 /********BPM**********/
 uint8_t gHue = 0;
@@ -247,6 +239,7 @@ EffectPoliceOne      effectPoliceOne(leds);
 EffectRainbow        effectRainbow(leds);
 EffectGlitterRainbow effectGlitterRainbow(leds);
 EffectTwinkle        effectTwinkle(leds);
+EffectFire           effectFire(leds);
 
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -526,6 +519,7 @@ void fadeall() {
   }
 }
 
+/*
 void Fire2012WithPalette() {
   // Array of temperature readings at each simulation cell
   static byte heat[NUM_LEDS];
@@ -561,7 +555,7 @@ void Fire2012WithPalette() {
     leds[pixelnumber] = color;
   }
 }
-
+*/
 
 
 boolean reconnect() {
@@ -776,9 +770,6 @@ void setup()
     e131.begin(E131_UNICAST);
   #endif
 
-
-  gPal = HeatColors_p; //for FIRE
-
 }
 
 
@@ -951,7 +942,7 @@ void loop()
           break;
 
         case eEffects::Fire:
-          Fire2012WithPalette();
+          effectFire.loop();
           break;
 
         case eEffects::Lightning:

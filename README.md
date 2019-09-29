@@ -1,5 +1,10 @@
 # PinkyLEDs
-## MQTT and E1.31 pixel driver for ESP8266 on D1 mini, NodeMCU 1.0 and ESP32 on DOIT ESP32 DEVKIT V1
+## MQTT and E1.31 pixel driver for ESP8266 and ESP32
+Known working boards:
+* D1 mini
+* NodeMCU 1.0
+* DOIT ESP32 DEVKIT V1
+* Espressif ESP32-WROOM-32D Dev board
 
 Originally forked from: https://github.com/Snipercaine/Holiday-LED-files.  This was expanded to add buttons to control on/off, colour selection, and effect selection (at the request of my daughter who likes to have as many ways to control anything as possible!!)
 ### Features:
@@ -11,7 +16,7 @@ Originally forked from: https://github.com/Snipercaine/Holiday-LED-files.  This 
 * Last will and testament MQTT messages to show online status
 * Original sketch effects and DrZzs custom effects [(from this video)](https://www.youtube.com/watch?v=6Y6jUM1OaYM&t=365s) included.
 * Home Assistant "white value" slider can be used to control effect speed
-* E1.31 Unicast control (ie Xlights) - (note can ONLY be selected via MQTT, it is experimental/untested on DSP32)
+* E1.31 Unicast control (ie Xlights) - (note can ONLY be selected via MQTT)
 * Support for Home Assistant `flash` function
 * OTA updates
 * Status indication at boot... red - powered up, amber - wifi connected, green MQTT connected
@@ -21,12 +26,15 @@ To set up, edit the config.h file to suit your setup, and upload via the Arduino
 
 It should be possible to run this on other ESP8266 boards, but other changes may be needed
 
-Additional libraries which you will require are:
+# Board libraries required:
 * ESP8266 Boards Version 2.5.2 (installed to arduinoIDE in boards manager)
-* ESP32 Boards Version 1.0.2 (installed to arduinoIDE in boards manager)
+
+or
+* ESP32 Boards Version 1.0.3 (installed to arduinoIDE in boards manager)
+# Additional libraries required
 * ArduinoJson version 5 (I'm using version 5.13.5) (Will not work with version 6)
 * PubSubClient version 2.7
-* FastLED version 3.2.8+ (I'm currently using 3.2.9)
+* FastLED Latest version (3.3.2)
 * ESPAsyncE131 latest git version from the master branch (ESP32 is not supported by v1.0.0)
 * ESPAsyncUDP (required by ESPAsyncE131)
 

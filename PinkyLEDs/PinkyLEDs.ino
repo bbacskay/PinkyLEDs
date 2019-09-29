@@ -19,14 +19,6 @@
   #include <ESPAsyncE131.h>
 #endif
 
-#ifdef ESP32
-  #define ON HIGH
-  #define OFF LOW
-#else
-  #define ON LOW
-  #define OFF HIGH
-#endif
-
 #define VERSION "0.8.0dev"
 
 #ifdef ARDUINO_ESP8266_NODEMCU
@@ -40,6 +32,14 @@
 #endif
 
 #define VERSION_FULL VERSION " " HW_PLATFORM
+
+#ifdef ESP32
+  #define LED_ON HIGH
+  #define LED_OFF LOW
+#else
+  #define LED_ON LOW
+  #define LED_OFF HIGH
+#endif
 
 int OTAport = 8266;
 
@@ -668,7 +668,9 @@ void setup()
   // Init serial
   Serial.begin(115200);
   // Init digital IO
-  pinMode(LED_BUILTIN, OUTPUT);              // Setup builtin LED
+  #ifdef LED_BUILTIN
+    pinMode(LED_BUILTIN, OUTPUT);            // Setup builtin LED
+  #endif
   pinMode(POWER_BUTTON_PIN, INPUT_PULLUP);   // Setup power button
   pinMode(COLOR_BUTTON_PIN, INPUT_PULLUP);   // Setup color button
   pinMode(EFFECT_BUTTON_PIN, INPUT_PULLUP);  // Setup effect button
@@ -781,7 +783,9 @@ void loop()
 
 #ifdef ENABLE_E131
   if (setEffect == eEffects::E131 && setPower == "ON") {
-    digitalWrite(BUILTIN_LED, ON);
+    #ifdef LED_BUILTIN
+      digitalWrite(BUILTIN_LED, LED_ON);
+    #endif
     if (!e131.isEmpty()) {
       e131_packet_t packet;
       e131.pull(&packet);     // Pull packet from ring buffer
@@ -804,12 +808,16 @@ void loop()
 
     if (setPower == "OFF") {
       //setEffect = "Solid";
-      digitalWrite(LED_BUILTIN, OFF);
+      #ifdef LED_BUILTIN
+        digitalWrite(LED_BUILTIN, LED_OFF);
+      #endif
       for ( int i = 0; i < NUM_LEDS; i++) {
         leds[i].fadeToBlackBy( 8 );   //FADE OFF LEDS
       }
     } else {
-      digitalWrite(LED_BUILTIN, ON);
+      #ifdef LED_BUILTIN
+        digitalWrite(LED_BUILTIN, LED_ON);
+      #endif
       static unsigned int flashDelay = 0;
       if (flashTime > 0) {
         if(millis()  - flashDelay >= flashTime) {

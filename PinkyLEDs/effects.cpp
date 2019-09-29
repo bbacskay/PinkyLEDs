@@ -30,7 +30,7 @@ void Effect::loop()
 
 }
 
-void Effect::resetStrip() const
+void Effect::resetStripe()
 {
   FastLED.clear();
   FastLED.show();
@@ -914,6 +914,19 @@ EffectFire::EffectFire(CRGB leds[])
 EffectFire::~EffectFire()
 {
   
+}
+
+
+void EffectFire::resetStripe()
+{
+  // Reset heat array
+  for (uint16_t i=0; i<NUM_LEDS;i++)
+  {
+    heat[i]=0;
+  }
+
+  // Call the resetStrip function from the parent
+  Effect::resetStripe();
 }
 
 // Fire2012WithPalette

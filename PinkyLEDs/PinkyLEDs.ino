@@ -1,38 +1,23 @@
 #include <ArduinoJson.h>
 #ifdef ESP32
-  #include "WiFi.h"
+  #include <WiFi.h>
+  #include <ESPmDNS.h>
 #elif defined(ESP8266)
   #include <ESP8266WiFi.h>
+  #include <ESP8266mDNS.h>
 #endif
 
 #include <PubSubClient.h>
 
-#ifdef ARDUINO_ESP8266_NODEMCU
-#define FASTLED_ESP8266_RAW_PIN_ORDER
-#endif
+#include "effects.h"
 
-#ifdef ESP8266
-/*
-  Spending too much time in the ISR or disabling the interrupts for too long
-  time could cause WDT reset.
-
-  For info see:
-  https://github.com/espressif/ESP8266_NONOS_SDK/issues/90
-  and
-  https://github.com/FastLED/FastLED/wiki/Interrupt-problems
-*/
-//#define FASTLED_ALLOW_INTERRUPTS 0
-#define FASTLED_INTERRUPT_RETRY_COUNT 1
-#endif
-
-#include <FastLED.h>
-#include <ArduinoOTA.h>
 #include "config.h"
+
+#include <ArduinoOTA.h>
+
 #ifdef ENABLE_E131
   #include <ESPAsyncE131.h>
 #endif
-
-#include "effects.h"
 
 #ifdef ESP32
   #define ON HIGH
@@ -42,7 +27,19 @@
   #define OFF HIGH
 #endif
 
-#define VERSION "0.7.0"
+#define VERSION "0.8.0dev"
+
+#ifdef ARDUINO_ESP8266_NODEMCU
+  #define HW_PLATFORM "NodeMCU"
+#elif defined(ARDUINO_ESP8266_WEMOS_D1MINI)
+  #define HW_PLATFORM "D1 mini"
+#elif defined(ESP32)
+  #define HW_PLATFORM "ESP32"
+#else
+  #define HW_PLATFORM "other"
+#endif
+
+#define VERSION_FULL VERSION " " HW_PLATFORM
 
 int OTAport = 8266;
 
@@ -117,7 +114,7 @@ const char effectList[][20] = { "Confetti",
                             "\"model\": \"generic\", " \
                             "\"manufacturer\": \"Pinkywafer\", " \
                             "\"name\": \"" DEVICE_NAME "\", " \
-                            "\"sw_version\": \"" VERSION "\"" \
+                            "\"sw_version\": \"" VERSION_FULL "\"" \
                            "}, " \
                            "\"name\": \"" DEVICE_NAME "\", " \
                            "\"platform\": \"mqtt\", " \
@@ -393,7 +390,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
         Serial.println(effectList[setEffect]);
       #endif
       #ifdef ENABLE_E131
-        if (setEffect == Effects::E131) {
+        if (setEffect == eEffects::E131) {
           FastLED.clear(true);
           #ifdef DEBUG
             Serial.println("LEDs Cleared.  Ready for E1.31");
@@ -531,44 +528,6 @@ void fadeall() {
     leds[i].nscale8(250);  //for CYCLON
   }
 }
-
-/*
-void Fire2012WithPalette() {
-  // Array of temperature readings at each simulation cell
-  static byte heat[NUM_LEDS];
-
-  // Step 1.  Cool down every cell a little
-  for ( int i = 0; i < NUM_LEDS; i++) {
-    heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
-  }
-
-  // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for ( int k = NUM_LEDS - 1; k >= 2; k--) {
-    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
-  }
-
-  // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-  if ( random8() < SPARKING ) {
-    int y = random8(7);
-    heat[y] = qadd8( heat[y], random8(160, 255) );
-  }
-
-  // Step 4.  Map from heat cells to LED colors
-  for ( int j = 0; j < NUM_LEDS; j++) {
-    // Scale the heat value from 0-255 down to 0-240
-    // for best results with color palettes.
-    byte colorindex = scale8( heat[j], 240);
-    CRGB color = ColorFromPalette( gPal, colorindex);
-    int pixelnumber;
-    if ( gReverseDirection ) {
-      pixelnumber = (NUM_LEDS - 1) - j;
-    } else {
-      pixelnumber = j;
-    }
-    leds[pixelnumber] = color;
-  }
-}
-*/
 
 
 boolean reconnect() {
@@ -821,7 +780,7 @@ void loop()
   handleEffectButton();
 
 #ifdef ENABLE_E131
-  if (setEffect == Effects::E131 && setPower == "ON") {
+  if (setEffect == eEffects::E131 && setPower == "ON") {
     digitalWrite(BUILTIN_LED, ON);
     if (!e131.isEmpty()) {
       e131_packet_t packet;
@@ -955,6 +914,11 @@ void loop()
           break;
 
         case eEffects::Fire:
+          // Resets strip if previous animation was running
+          if ( prevEffect != eEffects::Fire )
+          {
+            effectFire.resetStripe();
+          }
           effectFire.loop();
           break;
 
@@ -962,7 +926,7 @@ void loop()
           // Resets strip if previous animation was running
           if ( prevEffect != eEffects::Lightning )
           {
-            effectLightning.resetStrip();
+            effectLightning.resetStripe();
           }
           effectLightning.loop();
           break;
@@ -987,7 +951,7 @@ void loop()
           // Resets strip if previous animation was running
           if ( prevEffect != eEffects::Twinkle )
           {
-            effectTwinkle.resetStrip();
+            effectTwinkle.resetStripe();
           }
           effectTwinkle.loop();
           break;

@@ -1,6 +1,23 @@
 #pragma once
 
-#define FASTLED_ALLOW_INTERRUPTS 0
+#ifdef ESP8266
+/*
+  Spending too much time in the ISR or disabling the interrupts for too long
+  time could cause WDT reset.
+
+  For info see:
+  https://github.com/espressif/ESP8266_NONOS_SDK/issues/90
+  and
+  https://github.com/FastLED/FastLED/wiki/Interrupt-problems
+*/
+//#define FASTLED_ALLOW_INTERRUPTS 0
+#define FASTLED_INTERRUPT_RETRY_COUNT 1
+
+#ifdef ARDUINO_ESP8266_NODEMCU
+#define FASTLED_ESP8266_RAW_PIN_ORDER
+#endif
+
+#endif
 #include <FastLED.h> 
 
 #include "config.h"
@@ -11,7 +28,7 @@ public:
   Effect(CRGB leds[]);
   virtual ~Effect();
   virtual void loop();
-  void resetStrip() const;
+  virtual void resetStripe();
 
 protected:
   int antipodal_index(int) const;
@@ -451,6 +468,7 @@ class EffectFire : public Effect
 public:
   EffectFire(CRGB leds[]);
   virtual ~EffectFire();
+  void resetStripe() override;
   void loop();
 
 private:

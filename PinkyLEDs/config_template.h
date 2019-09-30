@@ -9,7 +9,7 @@
 #define wifi_password "yourWiFiPassword" // your WIFI Password
 
 #define mqtt_server "IP_Address" // your MQTT broker hostname or IP.
-#define MQTT_PORT 1883
+#define mqtt_port 1883
 #define mqtt_user "MQTT_USER" //enter your MQTT username
 #define mqtt_password "MQTTPASSWORD" //enter your MQTT password
 #define mqtt_group_topic "cmnd/PinkyLEDs" // MQTT group topic to allow controlling multiple controllers with a single mqtt command

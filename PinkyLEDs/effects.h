@@ -16,7 +16,7 @@
   #ifdef ARDUINO_ESP8266_NODEMCU
     #define FASTLED_ESP8266_RAW_PIN_ORDER
   #endif
-  
+
 #endif
 
 #include <FastLED.h> 
@@ -217,6 +217,11 @@ public:
   void loop();
 
 private:
+  uint16_t dist;                // A random number for our noise generator.
+  uint16_t scale;               // Wouldn't recommend changing this on the fly, or the animation will be really blocky.
+  uint8_t maxChanges;           // Value for blending between palettes.
+  CRGBPalette16 targetPalette;
+  CRGBPalette16 currentPalette;
 
 
 };

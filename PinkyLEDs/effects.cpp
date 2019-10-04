@@ -147,8 +147,8 @@ EffectSinelon::~EffectSinelon() {}
 // Sinelon's main loop
 void EffectSinelon::loop()
 {
-  fadeToBlackBy( m_Leds, NUM_LEDS, 40);
-  uint16_t pos = beatsin16(50, 0, NUM_LEDS - 1);
+  fadeToBlackBy( m_Leds, NUM_LEDS, 20);
+  uint16_t pos = beatsin16(13, 0, NUM_LEDS - 1);
   m_Leds[pos] += CRGB(Rcolor, Gcolor, Bcolor);
 }
 
@@ -371,7 +371,7 @@ void EffectStPatty::loop()
 
 // Constructor of EffectEaster class
 EffectEaster::EffectEaster(CRGB leds[])
-	: Effect(leds, "Easter")
+	: Effect(leds, "Easter"), scale(30), maxChanges(48), targetPalette(OceanColors_p), currentPalette(CRGB::Black)
 {
 	Serial.println("EffectEaster constructor called");
 }
@@ -382,7 +382,19 @@ EffectEaster::~EffectEaster() {}
 // Easter's main loop
 void EffectEaster::loop()
 {
-  //TODO
+  EVERY_N_MILLISECONDS(10) {
+    nblendPaletteTowardPalette(currentPalette, targetPalette, maxChanges);   // FOR NOISE ANIMATION
+
+    for (int i = 0; i < NUM_LEDS; i++) {                                     // Just ONE loop to fill up the LED array as all of the pixels change.
+      uint8_t index = inoise8(i * scale, dist + i * scale) % 255;            // Get a value from the noise function. I'm using both x and y axis.
+      m_Leds[i] = ColorFromPalette(currentPalette, index, 255, LINEARBLEND); // With that value, look up the 8 bit colour palette value and assign it to the current LED.
+    }
+    dist += beatsin8(10, 1, 4);                                              // Moving along the distance (that random number we started out with). Vary it a bit with a sine wave.
+  }
+
+  EVERY_N_SECONDS(5) {
+    targetPalette = CRGBPalette16(CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 192, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)));
+  }
 }
 
 /******************************************************************************

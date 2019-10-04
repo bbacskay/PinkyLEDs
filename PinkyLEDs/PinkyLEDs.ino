@@ -185,13 +185,6 @@ uint8_t Bcolor;
 bool startupMQTTconnect = true;
 
 
-/****************FOR NOISE - I'm using this one for Easter***************/
-static uint16_t dist;         // A random number for our noise generator.
-uint16_t scale = 30;          // Wouldn't recommend changing this on the fly, or the animation will be really blocky.
-uint8_t maxChanges = 48;      // Value for blending between palettes.
-CRGBPalette16 targetPalette(OceanColors_p);
-CRGBPalette16 currentPalette(CRGB::Black);
-
 /*****************For TWINKLE********/
 int twinklecounter = 0;
 
@@ -933,6 +926,10 @@ void loop()
           effectStPatty.loop();
           break;
 
+        case eEffects::Easter:
+          effectEaster.loop();
+          break;
+
         case eEffects::Usa:                        // colored stripes pulsing in Shades of Red White & Blue
           effectUsa.loop();
           break;
@@ -1033,19 +1030,8 @@ void loop()
       random16_add_entropy( random8());
 
       EVERY_N_MILLISECONDS(10) {
-        nblendPaletteTowardPalette(currentPalette, targetPalette, maxChanges);  // FOR NOISE ANIMATION
-        {
-          gHue++;
-        }
-
-        if (setEffect == eEffects::Easter) {
-          setPower = "ON";
-          for (int i = 0; i < NUM_LEDS; i++) {                                     // Just ONE loop to fill up the LED array as all of the pixels change.
-            uint8_t index = inoise8(i * scale, dist + i * scale) % 255;            // Get a value from the noise function. I'm using both x and y axis.
-            leds[i] = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
-          }
-          dist += beatsin8(10, 1, 4);                                              // Moving along the distance (that random number we started out with). Vary it a bit with a sine wave.
-        }
+      
+        gHue++;
 
         if (setEffect == eEffects::Ripple) {
           for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(bgcol++, 255, 15);  // Rotate background colour.
@@ -1069,10 +1055,6 @@ void loop()
               break;
           }
         }
-      }
-
-      EVERY_N_SECONDS(5) {
-        targetPalette = CRGBPalette16(CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 192, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)));
       }
 
     }

@@ -19,7 +19,7 @@
   #include <ESPAsyncE131.h>
 #endif
 
-#define VERSION "0.8.0dev"
+#define VERSION "0.8.99dev"
 
 #ifdef ARDUINO_ESP8266_NODEMCU
   #define HW_PLATFORM "NodeMCU"
@@ -88,10 +88,24 @@ const char effectList[][20] = { "Confetti",
                                 "USA",
                                 "Independence",
                                 "Go Blue",
-                                "Hail", "Touchdown", "Halloween", "Punkin", "Thanksgiving",
-                                "Turkey Day", "BPM", "Cyclon Rainbow", "Dots", "Fire",
-                                "Lightning", "Police All", "Police One", "Rainbow", "Glitter Rainbow",
-                                "Ripple", "Twinkle"};
+                                "Hail",
+                                "Touchdown",
+                                "Halloween",
+                                "Punkin",
+                                "Thanksgiving",
+                                "Turkey Day",
+                                "BPM",
+                                "Cyclon Rainbow",
+                                "Dots",
+                                "Fire",
+                                "Lightning",
+                                "Police All",
+                                "Police One",
+                                "Rainbow",
+                                "Glitter Rainbow",
+                                "Ripple",
+                                "Twinkle"
+                              };
 
 
 /****************************** MQTT TOPICS (change these topics as you wish)  ***************************************/
@@ -231,6 +245,7 @@ EffectHollyJolly     effectHollyJolly(leds);
 EffectValentine      effectValentine(leds, gHue);
 EffectLoveyDay       effectLoveyDay(leds);
 EffectStPatty        effectStPatty(leds, gHue);
+EffectEaster         effectEaster(leds);
 EffectUsa            effectUsa(leds, gHue);
 EffectIndependence   effectIndependence(leds);
 EffectGoBlue         effectGoBlue(leds, gHue);
@@ -250,6 +265,41 @@ EffectRainbow        effectRainbow(leds);
 EffectGlitterRainbow effectGlitterRainbow(leds);
 EffectTwinkle        effectTwinkle(leds);
 EffectFire           effectFire(leds);
+
+Effect* effectArray[] = {
+                          &effectConfetti,
+                          &effectGlitter,
+                          &effectJuggle,
+                          &effectSinelon,
+                          &effectSolid,
+                          &effectChristmas,
+                          &effectCandyCane,
+                          &effectHollyJolly,
+                          &effectValentine,
+                          &effectLoveyDay,
+                          &effectStPatty,
+                          &effectEaster,
+                          &effectUsa,
+                          &effectIndependence,
+                          &effectGoBlue,
+                          &effectHail,
+                          &effectTouchdown,
+                          &effectHalloween,
+                          &effectPunkin,
+                          &effectThanksgiving,
+                          &effectTurkeyDay,
+                          &effectBpm,
+                          &effectCyclonRainbow,
+                          &effectDots,
+                          &effectFire,
+                          &effectLightning,
+                          &effectPoliceAll,
+                          &effectPoliceOne,
+                          &effectRainbow,
+                          &effectGlitterRainbow,
+                          //&effectRipple,
+                          &effectTwinkle
+};
 
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -704,7 +754,7 @@ void setup()
   #endif
 
 
-// Init OTA
+  // Init OTA
   ArduinoOTA.setPort(OTAport);
   ArduinoOTA.setHostname(DEVICE_NAME);
   ArduinoOTA.setPassword((const char *)OTApassword);
@@ -745,6 +795,15 @@ void setup()
   #ifdef ENABLE_E131
     e131.begin(E131_UNICAST);
   #endif
+
+  Serial.println("Effect's list:");
+  for (int i=0; i<31; i++)
+  {
+    Serial.print(i);
+    Serial.print(" - ");
+    Serial.println(effectArray[i]->GetEffectName());
+  }
+
 
 }
 
@@ -809,7 +868,6 @@ void loop()
     static bool flashOff = false;
 
     if (setPower == "OFF") {
-      //setEffect = "Solid";
       #ifdef LED_BUILTIN
         digitalWrite(LED_BUILTIN, LED_OFF);
       #endif
@@ -1033,7 +1091,7 @@ void loop()
     } 
     else 
     {
-      if (animationspeed > 0 && animationspeed < 255)   //Sets animation speed based on receieved value
+      if ((animationspeed > 0) && (animationspeed < 255))   //Sets animation speed based on receieved value
       {
         FastLED.delay((255 - (animationspeed - 1)) * 6);
       }
@@ -1043,6 +1101,10 @@ void loop()
       }
     }
 
+    #ifdef DEBUG_FPS
+      Serial.print("FPS: ");
+      Serial.println(FastLED.getFPS());
+    #endif
   }
 
 

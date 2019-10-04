@@ -1,23 +1,24 @@
 #pragma once
 
 #ifdef ESP8266
-/*
-  Spending too much time in the ISR or disabling the interrupts for too long
-  time could cause WDT reset.
+  /*
+    Spending too much time in the ISR or disabling the interrupts for too long
+    time could cause WDT reset.
 
-  For info see:
-  https://github.com/espressif/ESP8266_NONOS_SDK/issues/90
-  and
-  https://github.com/FastLED/FastLED/wiki/Interrupt-problems
-*/
-//#define FASTLED_ALLOW_INTERRUPTS 0
-#define FASTLED_INTERRUPT_RETRY_COUNT 1
+    For info see:
+    https://github.com/espressif/ESP8266_NONOS_SDK/issues/90
+    and
+    https://github.com/FastLED/FastLED/wiki/Interrupt-problems
+  */
+  //#define FASTLED_ALLOW_INTERRUPTS 0
+  #define FASTLED_INTERRUPT_RETRY_COUNT 1
 
-#ifdef ARDUINO_ESP8266_NODEMCU
-#define FASTLED_ESP8266_RAW_PIN_ORDER
+  #ifdef ARDUINO_ESP8266_NODEMCU
+    #define FASTLED_ESP8266_RAW_PIN_ORDER
+  #endif
+  
 #endif
 
-#endif
 #include <FastLED.h> 
 
 #include "config.h"
@@ -25,14 +26,18 @@
 class Effect
 {
 public:
-  Effect(CRGB leds[]);
+  Effect(CRGB leds[], String);
   virtual ~Effect();
+  String GetEffectName() const;
   virtual void loop();
   virtual void resetStripe();
 
 protected:
   int antipodal_index(int) const;
   CRGB * m_Leds;
+  const String m_Name;
+
+  private:
 
 };
 
@@ -45,6 +50,7 @@ public:
   void loop();
 
 private:
+
   uint8_t& Rcolor;
   uint8_t& Gcolor;
   uint8_t& Bcolor;
@@ -63,6 +69,8 @@ public:
 private:
   void addGlitterColor( fract8 chanceOfGlitter, const int Rcolor, const int Gcolor, const int Bcolor) const;
 
+  //static const String m_Name;
+
   uint8_t& Rcolor;
   uint8_t& Gcolor;
   uint8_t& Bcolor;
@@ -75,9 +83,12 @@ class EffectJuggle : public Effect
 public:
   EffectJuggle(CRGB leds[], uint8_t&, uint8_t&, uint8_t&);
   virtual ~EffectJuggle();
+  //String GetEffectName() const override;
   void loop();
 
 private:
+  //static const String m_Name;
+
   uint8_t& Rcolor;
   uint8_t& Gcolor;
   uint8_t& Bcolor;
@@ -93,6 +104,8 @@ public:
   void loop();
 
 private:
+  //static const String m_Name;
+
   uint8_t& Rcolor;
   uint8_t& Gcolor;
   uint8_t& Bcolor;
@@ -108,6 +121,8 @@ public:
   void loop();
 
 private:
+  //static const String m_Name;
+
   uint8_t& Rcolor;
   uint8_t& Gcolor;
   uint8_t& Bcolor;
@@ -123,6 +138,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   uint8_t& gHue;
 
 };
@@ -137,6 +154,8 @@ public:
 
 private:
   void setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA);
+
+  //static const String m_Name;
 
   CRGBPalette16 currentPalettestriped;
   uint8_t startIndex;
@@ -154,6 +173,8 @@ public:
 private:
   void setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA);
 
+  static const String m_Name;
+
   CRGBPalette16 HJPalettestriped;
   uint8_t startIndex;
 
@@ -167,6 +188,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   int idex;    // -LED INDEX (0 to NUM_LEDS-1)
   uint8_t thishueLovey;
   int thissat;     // -FX LOOPS DELAY VAR
@@ -181,7 +204,20 @@ public:
   void loop();
 
 private:
+
   uint8_t& gHue;
+
+};
+
+class EffectEaster : public Effect
+{
+public:
+  EffectEaster(CRGB leds[]);
+  virtual ~EffectEaster();
+  void loop();
+
+private:
+
 
 };
 
@@ -193,6 +229,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   uint8_t& gHue;
 
 };
@@ -205,6 +243,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   uint8_t& gHue;
 
 };
@@ -219,6 +259,8 @@ public:
 private:
   void setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA);
 
+  static const String m_Name;
+
   CRGBPalette16 IndPalettestriped;
   uint8_t startIndex;
 
@@ -232,7 +274,9 @@ public:
   void loop();
 
 private:
-    uint8_t& gHue;
+  static const String m_Name;
+  
+  uint8_t& gHue;
 
 };
 
@@ -246,6 +290,8 @@ public:
 
 private:
   void setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA);
+
+  static const String m_Name;
 
   CRGBPalette16 hailPalettestriped;
   uint8_t startIndex;
@@ -261,6 +307,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   int idex;    // -LED INDEX (0 to NUM_LEDS-1)
   uint8_t thishuetouch;
   int thissat;     // -FX LOOPS DELAY VAR
@@ -276,6 +324,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   uint8_t& gHue;
 
 };
@@ -289,6 +339,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   uint8_t& gHue;
 
 };
@@ -303,6 +355,8 @@ public:
 
 private:
   void setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA);
+
+  static const String m_Name;
 
   CRGBPalette16 PunkinPalettestriped;
   uint8_t startIndex;
@@ -320,6 +374,8 @@ public:
 private:
   void setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA);
 
+  static const String m_Name;
+
   CRGBPalette16 ThxPalettestriped;
   uint8_t startIndex;
 
@@ -334,6 +390,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   uint8_t& gHue;
 
 };
@@ -348,6 +406,8 @@ public:
 
 
 private:
+  static const String m_Name;
+
   uint8_t cyclonHue;
   int     cyclonPos;
   bool    forwards;
@@ -362,6 +422,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   uint8_t& bpm;
   uint8_t& fadeval;
 
@@ -377,6 +439,8 @@ public:
 
 
 private:
+  static const String m_Name;
+
   uint16_t ledstart;                  // Starting location of a flash
   uint16_t ledlen;
   unsigned int lightningFlashTime;
@@ -395,6 +459,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   int     idex;               // -LED INDEX (0 to NUM_LEDS-1)
   uint8_t thishuepolice;
   int     thissat;            // -FX LOOPS DELAY VAR
@@ -409,6 +475,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   int     idex;               // -LED INDEX (0 to NUM_LEDS-1)
   uint8_t thishuepolice;
   int     thissat;            // -FX LOOPS DELAY VAR
@@ -424,6 +492,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   uint8_t thishue;            // Starting hue value.
   uint8_t deltahue;
 
@@ -440,6 +510,8 @@ public:
 private:
   void addGlitter( fract8 );
 
+  static const String m_Name;
+
   uint8_t thishue;            // Starting hue value.
   uint8_t deltahue;
 
@@ -454,6 +526,8 @@ public:
   void loop();
 
 private:
+  static const String m_Name;
+
   const uint8_t density;
 
 };
@@ -468,10 +542,13 @@ class EffectFire : public Effect
 public:
   EffectFire(CRGB leds[]);
   virtual ~EffectFire();
+  //String GetEffectName() const override;
   void resetStripe() override;
   void loop();
 
 private:
+  //static const String m_Name;
+
   bool gReverseDirection;
   uint8_t heat[NUM_LEDS];  // Array of temperature readings at each simulation cell
   CRGBPalette16 gPal;

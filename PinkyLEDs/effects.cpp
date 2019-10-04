@@ -2,9 +2,15 @@
 
 #define TOP_INDEX (NUM_LEDS / 2)
 
-//#pragma region class_Effect
-Effect::Effect(CRGB leds[])
-  : m_Leds(leds)
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Effect class                               *
+ *                                                                            *
+ *****************************************************************************/
+
+Effect::Effect(CRGB leds[], String name)
+  : m_Leds(leds), m_Name(name)
 {
   
 }
@@ -12,6 +18,11 @@ Effect::Effect(CRGB leds[])
 Effect::~Effect()
 {
 
+}
+
+String Effect::GetEffectName() const
+{
+  return m_Name;
 }
 
 // Function to calculate antipodial index
@@ -36,20 +47,21 @@ void Effect::resetStripe()
   FastLED.show();
 }
 
-
+/******************************************************************************
+ *                                                                            *
+ *                            EffectConfetti class                            *
+ *                                                                            *
+ *****************************************************************************/
 
 // Constructor of EffectConfetti class
 EffectConfetti::EffectConfetti(CRGB leds[], uint8_t& Rcolor, uint8_t& Gcolor, uint8_t& Bcolor)
-	: Effect(leds), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
+	: Effect(leds, "Confetti"), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
 {
 	Serial.println("EffectConfetti constructor called");
 }
 
 // Destructor of EffectConfetti class
-EffectConfetti::~EffectConfetti()
-{
-
-}
+EffectConfetti::~EffectConfetti() {}
 
 void EffectConfetti::loop()
 {
@@ -58,20 +70,23 @@ void EffectConfetti::loop()
   m_Leds[pos] += CRGB(Rcolor + random8(64), Gcolor, Bcolor);
 }
 
+/******************************************************************************
+ *                                                                            *
+ *                             EffectGlitter class                            *
+ *                                                                            *
+ *****************************************************************************/
 
 // Constructor of EffectGlitter class
 EffectGlitter::EffectGlitter(CRGB leds[], uint8_t& Rcolor, uint8_t& Gcolor, uint8_t& Bcolor)
-	: Effect(leds), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
+	: Effect(leds, "Glitter"), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
 {
 	Serial.println("EffectGlitter constructor called");
 }
 
 // Destructor of EffectGlitter class
-EffectGlitter::~EffectGlitter()
-{
+EffectGlitter::~EffectGlitter() {}
 
-}
-
+//
 void EffectGlitter::addGlitterColor( fract8 chanceOfGlitter, const int Rcolor, const int Gcolor, const int Bcolor) const
 {
   if ( random8() < chanceOfGlitter) {
@@ -85,19 +100,23 @@ void EffectGlitter::loop()
   addGlitterColor(80, Rcolor, Gcolor, Bcolor);
 }
 
+/******************************************************************************
+ *                                                                            *
+ *                             EffectJuggle class                             *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectJuggle class
 EffectJuggle::EffectJuggle(CRGB leds[], uint8_t& Rcolor, uint8_t& Gcolor, uint8_t& Bcolor)
-	: Effect(leds), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
+	: Effect(leds, "Juggle"), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
 {
 	Serial.println("class_EffectJuggle constructor called");
 }
 
 // Destructor of EffectJuggle class
-EffectJuggle::~EffectJuggle()
-{
+EffectJuggle::~EffectJuggle() {}
 
-}
-
+// Juggle's main loop
 void EffectJuggle::loop()
 {
   fadeToBlackBy( m_Leds, NUM_LEDS, 20);
@@ -109,58 +128,69 @@ void EffectJuggle::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                            EffectSinelon class                             *
+ *                                                                            *
+ *****************************************************************************/
+
+// Constructor of EffectSinelon class
+EffectSinelon::EffectSinelon(CRGB leds[], uint8_t& Rcolor, uint8_t& Gcolor, uint8_t& Bcolor)
+	: Effect(leds, "Sinelon"), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
+{
+	Serial.println("class_EffectSinelon constructor called");
+}
+
+// Destructor of EffectSinelon class
+EffectSinelon::~EffectSinelon() {}
+
+// Sinelon's main loop
+void EffectSinelon::loop()
+{
+  fadeToBlackBy( m_Leds, NUM_LEDS, 40);
+  uint16_t pos = beatsin16(50, 0, NUM_LEDS - 1);
+  m_Leds[pos] += CRGB(Rcolor, Gcolor, Bcolor);
+}
+
+
+/******************************************************************************
+ *                                                                            *
+ *                             EffectSolid class                              *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectSolid class
 EffectSolid::EffectSolid(CRGB leds[], uint8_t& Rcolor, uint8_t& Gcolor, uint8_t& Bcolor)
-	: Effect(leds), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
+	: Effect(leds, "Solid"), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
 {
 	Serial.println("class_EffectSolid constructor called");
 }
 
 // Destructor of EffectSolid class
-EffectSolid::~EffectSolid()
-{
+EffectSolid::~EffectSolid() {}
 
-}
-
+// Solid's main loop
 void EffectSolid::loop()
 {
   fill_solid(m_Leds, NUM_LEDS, CRGB(Rcolor, Gcolor, Bcolor));
 }
 
 
-// Constructor of EffectSinelon class
-EffectSinelon::EffectSinelon(CRGB leds[], uint8_t& Rcolor, uint8_t& Gcolor, uint8_t& Bcolor)
-	: Effect(leds), Rcolor(Rcolor), Gcolor(Gcolor), Bcolor(Bcolor)
-{
-	Serial.println("class_EffectSinelon constructor called");
-}
+/******************************************************************************
+ *                                                                            *
+ *                           EffectChristmas class                            *
+ *                                                                            *
+ *****************************************************************************/
 
-// Destructor of EffectSinelon class
-EffectSinelon::~EffectSinelon()
-{
-
-}
-
-void EffectSinelon::loop()
-{
-  fadeToBlackBy( m_Leds, NUM_LEDS, 20);
-  int pos = beatsin16(13, 0, NUM_LEDS - 1);
-  m_Leds[pos] += CRGB(Rcolor, Gcolor, Bcolor);
-}
-
-
-//#pragma region class_EffectChristmas
 // Constructor of EffectChristmas class
 EffectChristmas::EffectChristmas(CRGB leds[], uint8_t& gHue )
-	: Effect(leds), gHue(gHue)
+	: Effect(leds, "Christmas"), gHue(gHue)
 {
 	Serial.println("EffectChristmas constructor called");
 }
 
-EffectChristmas::~EffectChristmas()
-{
-
-}
+// Destructor of EffectChristmas class
+EffectChristmas::~EffectChristmas() {}
 
 //palette for Christmas
 DEFINE_GRADIENT_PALETTE( bhw2_xmas_gp ) {
@@ -178,6 +208,7 @@ DEFINE_GRADIENT_PALETTE( bhw2_xmas_gp ) {
   255,  42,  0,  0
 };
 
+// Christmas's main loop
 void EffectChristmas::loop()
 {
   uint8_t BeatsPerMinute = 62;
@@ -188,12 +219,16 @@ void EffectChristmas::loop()
   }
 }
 
-//#pragma endregion class_EffectChristmas
 
+/******************************************************************************
+ *                                                                            *
+ *                           EffectCandyCane class                            *
+ *                                                                            *
+ *****************************************************************************/
 
 // Constructor of EffectCandyCane class
 EffectCandyCane::EffectCandyCane(CRGB leds[])
-	: Effect(leds), startIndex(0)
+	: Effect(leds, "Candy Cane"), startIndex(0)
 {
   // Init palette
   setupPalette( CRGB::Red, CRGB::Red, CRGB::White, CRGB::White );
@@ -201,17 +236,17 @@ EffectCandyCane::EffectCandyCane(CRGB leds[])
   Serial.println("EffectCandyCane constructor called");
 }
 
-EffectCandyCane::~EffectCandyCane()
-{
-  
-}
+// Destructor of EffectCandyCane class
+EffectCandyCane::~EffectCandyCane() {}
 
+//
 void EffectCandyCane::setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA) {
   currentPalettestriped = CRGBPalette16(
                         A, A, A, A, A, A, A, A, B, B, B, B, B, B, B, B
                       );
 }
 
+// Candy Cane's main loop
 void EffectCandyCane::loop()
 {
   startIndex += 1;   // higher = faster motion
@@ -223,9 +258,15 @@ void EffectCandyCane::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                          EffectHollyJolly class                            *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectHollyJolly class
 EffectHollyJolly::EffectHollyJolly(CRGB leds[])
-	: Effect(leds), startIndex(0)
+	: Effect(leds, "Holly Jolly"), startIndex(0)
 {
   // Init palette
   setupPalette( CRGB::Red, CRGB::Red, CRGB::Green, CRGB::Green );
@@ -233,17 +274,17 @@ EffectHollyJolly::EffectHollyJolly(CRGB leds[])
   Serial.println("EffectHollyJolly constructor called");
 }
 
-EffectHollyJolly::~EffectHollyJolly()
-{
-  
-}
+// Destructor of EffectHollyJolly class
+EffectHollyJolly::~EffectHollyJolly() {}
 
+//
 void EffectHollyJolly::setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA) {
   HJPalettestriped = CRGBPalette16(
                         A, A, A, A, A, A, A, A, B, B, B, B, B, B, B, B
                       );
 }
 
+// Holly Jolly's main loop
 void EffectHollyJolly::loop()
 {
   startIndex += 1;   // higher = faster motion
@@ -255,20 +296,24 @@ void EffectHollyJolly::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                           EffectLoveyDay class                             *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectLoveyDay class
 EffectLoveyDay::EffectLoveyDay(CRGB leds[])
-	: Effect(leds), idex(0), thishueLovey(0), thissat(255)
+	: Effect(leds, "Lovey Day"), idex(0), thishueLovey(0), thissat(255)
 {
 
   Serial.println("EffectLoveyDay constructor called");
 }
 
-EffectLoveyDay::~EffectLoveyDay()
-{
-  
-}
+// Destructor of EffectLoveyDay class
+EffectLoveyDay::~EffectLoveyDay() {}
 
-
+// Lovey Day's main loop
 void EffectLoveyDay::loop()
 {
   idex++;
@@ -283,18 +328,21 @@ void EffectLoveyDay::loop()
 }
 
 
-//#pragma region class_EffectStPatty
+/******************************************************************************
+ *                                                                            *
+ *                            EffectStPatty class                             *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectStPatty class
 EffectStPatty::EffectStPatty(CRGB leds[], uint8_t& gHue)
-	: Effect(leds), gHue(gHue)
+	: Effect(leds, "St Patty"), gHue(gHue)
 {
 	Serial.println("EffectStPatty constructor called");
 }
 
-EffectStPatty::~EffectStPatty()
-{
-  
-}
+// Destructor of EffectStPatty class
+EffectStPatty::~EffectStPatty() {}
 
 // Palette for St Patty
 DEFINE_GRADIENT_PALETTE( bhw2_greenman_gp ) {
@@ -303,7 +351,7 @@ DEFINE_GRADIENT_PALETTE( bhw2_greenman_gp ) {
   255,   1, 22,  1
 };
 
-
+// St Patty's main loop
 void EffectStPatty::loop()
 {
   uint8_t BeatsPerMinute = 62;
@@ -314,21 +362,44 @@ void EffectStPatty::loop()
   }
 };
 
-//#pragma endregion class_EffectStPatty
 
+/******************************************************************************
+ *                                                                            *
+ *                             EffectEaster class                             *
+ *                                                                            *
+ *****************************************************************************/
+
+// Constructor of EffectEaster class
+EffectEaster::EffectEaster(CRGB leds[])
+	: Effect(leds, "Easter")
+{
+	Serial.println("EffectEaster constructor called");
+}
+
+// Destructor of EffectEaster class
+EffectEaster::~EffectEaster() {}
+
+// Easter's main loop
+void EffectEaster::loop()
+{
+  //TODO
+}
+
+/******************************************************************************
+ *                                                                            *
+ *                           EffectValentine class                            *
+ *                                                                            *
+ *****************************************************************************/
 
 // Constructor of EffectValentine class
 EffectValentine::EffectValentine(CRGB leds[], uint8_t& gHue)
-	: Effect(leds), gHue(gHue)
+	: Effect(leds, "Valentine"), gHue(gHue)
 {
 	Serial.println("EffectValentine constructor called");
 }
 
-EffectValentine::~EffectValentine()
-{
-  
-}
-
+// Destructor of EffectStPatty class
+EffectValentine::~EffectValentine() {}
 
 //palette for Valentine
 DEFINE_GRADIENT_PALETTE( bhw2_redrosey_gp ) {
@@ -342,6 +413,7 @@ DEFINE_GRADIENT_PALETTE( bhw2_redrosey_gp ) {
   255, 103,  1, 10
 };
 
+// Valentine's main loop
 void EffectValentine::loop()
 {
   uint8_t BeatsPerMinute = 62;
@@ -353,17 +425,21 @@ void EffectValentine::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                           EffectTurkeyDay class                            *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectTurkeyDay class
 EffectTurkeyDay::EffectTurkeyDay(CRGB leds[], uint8_t& gHue)
-	: Effect(leds), gHue(gHue)
+	: Effect(leds, "Turkey Day"), gHue(gHue)
 {
 	Serial.println("EffectTurkeyDay constructor called");
 }
 
-EffectTurkeyDay::~EffectTurkeyDay()
-{
-  
-}
+// Destructor of EffectTurkeyDay class
+EffectTurkeyDay::~EffectTurkeyDay() {}
 
 //palette for Turkey Day
 DEFINE_GRADIENT_PALETTE( bhw2_thanks_gp ) {
@@ -378,6 +454,7 @@ DEFINE_GRADIENT_PALETTE( bhw2_thanks_gp ) {
   255,   9,  5,  1
 };
 
+// Turkey Day's main loop
 void EffectTurkeyDay::loop()
 {
   uint8_t BeatsPerMinute = 62;
@@ -389,9 +466,15 @@ void EffectTurkeyDay::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                          EffectThanksgiving class                          *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectThanksgiving class
 EffectThanksgiving::EffectThanksgiving(CRGB leds[])
-	: Effect(leds), startIndex(0)
+	: Effect(leds, "Thanksgiving"), startIndex(0)
 {
   // Init palette
   setupPalette( CRGB::OrangeRed, CRGB::Olive, CRGB::Maroon, CRGB::Maroon);
@@ -399,10 +482,9 @@ EffectThanksgiving::EffectThanksgiving(CRGB leds[])
   Serial.println("EffectThanksgiving constructor called");
 }
 
-EffectThanksgiving::~EffectThanksgiving()
-{
-  
-}
+// Destructor of EffectThanksgiving class
+EffectThanksgiving::~EffectThanksgiving() {}
+
 
 void EffectThanksgiving::setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA) {
   ThxPalettestriped = CRGBPalette16(
@@ -410,6 +492,7 @@ void EffectThanksgiving::setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA) {
                       );
 }
 
+// Thanksgiving's main loop
 void EffectThanksgiving::loop()
 {
   startIndex += 1;   // higher = faster motion
@@ -421,17 +504,21 @@ void EffectThanksgiving::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                               EffectUsa class                              *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectUsa class
 EffectUsa::EffectUsa(CRGB leds[], uint8_t& gHue)
-	: Effect(leds), gHue(gHue)
+	: Effect(leds, "USA"), gHue(gHue)
 {
 	Serial.println("EffectUsa constructor called");
 }
 
-EffectUsa::~EffectUsa()
-{
-  
-}
+// Destructor of EffectUsa class
+EffectUsa::~EffectUsa() {}
 
 //palette for USA
 DEFINE_GRADIENT_PALETTE( bhw3_41_gp ) {
@@ -446,6 +533,7 @@ DEFINE_GRADIENT_PALETTE( bhw3_41_gp ) {
   255,  42,  0,  0
 };
 
+// Usa's main loop
 void EffectUsa::loop()
 {
   uint8_t BeatsPerMinute = 62;
@@ -457,9 +545,15 @@ void EffectUsa::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                          EffectIndependence class                          *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectIndependence class
 EffectIndependence::EffectIndependence(CRGB leds[])
-	: Effect(leds), startIndex(0)
+	: Effect(leds, "Independence"), startIndex(0)
 {
   // Init palette
   setupPalette( CRGB::FireBrick, CRGB::Cornsilk, CRGB::MediumBlue, CRGB::MediumBlue );
@@ -467,10 +561,8 @@ EffectIndependence::EffectIndependence(CRGB leds[])
   Serial.println("EffectIndependence constructor called");
 }
 
-EffectIndependence::~EffectIndependence()
-{
-  
-}
+// Destructor of EffectIndependence class
+EffectIndependence::~EffectIndependence() {}
 
 void EffectIndependence::setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA)
 {
@@ -479,6 +571,7 @@ void EffectIndependence::setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA)
                       );
 }
 
+// Independence's main loop
 void EffectIndependence::loop()
 {
   startIndex += 1;   // higher = faster motion 
@@ -489,18 +582,22 @@ void EffectIndependence::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                              EffectGoBlue class                            *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectGoBlue class
 EffectGoBlue::EffectGoBlue(CRGB leds[], uint8_t& gHue)
-	: Effect(leds), gHue(gHue)
+	: Effect(leds, "Go Blue"), gHue(gHue)
 {
 
   Serial.println("EffectGoBlue constructor called");
 }
 
-EffectGoBlue::~EffectGoBlue()
-{
-  
-}
+// Destructor of EffectGoBlue class
+EffectGoBlue::~EffectGoBlue() {}
 
 //palette for Go Blue
 DEFINE_GRADIENT_PALETTE( Pills_3_gp ) {
@@ -509,6 +606,7 @@ DEFINE_GRADIENT_PALETTE( Pills_3_gp ) {
   255, 192, 147, 11
 };
 
+// Go Blue's main loop
 void EffectGoBlue::loop()
 {
   uint8_t BeatsPerMinute = 62;
@@ -520,9 +618,15 @@ void EffectGoBlue::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                               EffectHail class                             *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectHail class
 EffectHail::EffectHail(CRGB leds[])
-	: Effect(leds), startIndex(0)
+	: Effect(leds, "Hail"), startIndex(0)
 {
   // Init palette
   setupPalette( CRGB::Blue, CRGB::Blue, CRGB::Yellow, CRGB::Yellow );
@@ -530,10 +634,9 @@ EffectHail::EffectHail(CRGB leds[])
   Serial.println("EffectHail constructor called");
 }
 
-EffectHail::~EffectHail()
-{
-  
-}
+// Destructor of EffectHail class
+EffectHail::~EffectHail() {}
+
 
 void EffectHail::setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA)
 {
@@ -542,6 +645,7 @@ void EffectHail::setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA)
                       );
 }
 
+// Hail's main loop
 void EffectHail::loop()
 {
   startIndex += 1;                // higher = faster motion
@@ -552,19 +656,24 @@ void EffectHail::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                            EffectTouchdown class                           *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectTouchdown class
 EffectTouchdown::EffectTouchdown(CRGB leds[])
-	: Effect(leds), idex(0), thishuetouch(0), thissat(255)
+	: Effect(leds, "Touchdown"), idex(0), thishuetouch(0), thissat(255)
 {
 
   Serial.println("EffectTouchdown constructor called");
 }
 
-EffectTouchdown::~EffectTouchdown()
-{
-  
-}
+// Destructor of EffectTouchdown class
+EffectTouchdown::~EffectTouchdown() {}
 
+// Touchdown's main loop
 void EffectTouchdown::loop()
 {
   idex++;
@@ -579,18 +688,22 @@ void EffectTouchdown::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                            EffectHalloween class                           *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectHalloween class
 EffectHalloween::EffectHalloween(CRGB leds[], uint8_t& gHue)
-	: Effect(leds), gHue(gHue)
+	: Effect(leds, "Halloween"), gHue(gHue)
 {
 
   Serial.println("EffectHalloween constructor called");
 }
 
-EffectHalloween::~EffectHalloween()
-{
-  
-}
+// Destructor of EffectTouchdown class
+EffectHalloween::~EffectHalloween() {}
 
 //palette for Halloween
 DEFINE_GRADIENT_PALETTE( Orange_to_Purple_gp ) {
@@ -599,6 +712,7 @@ DEFINE_GRADIENT_PALETTE( Orange_to_Purple_gp ) {
   255,  97, 12, 178
 };
 
+// Halloween's main loop
 void EffectHalloween::loop()
 {
   uint8_t BeatsPerMinute = 62;
@@ -611,9 +725,15 @@ void EffectHalloween::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                             EffectPunkin class                             *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectPunkin class
 EffectPunkin::EffectPunkin(CRGB leds[])
-	: Effect(leds), startIndex(0)
+	: Effect(leds, "Punkin"), startIndex(0)
 {
   // Init palette
   setupPalette( CRGB::DarkOrange, CRGB::DarkOrange, CRGB::Indigo, CRGB::Indigo );
@@ -621,10 +741,9 @@ EffectPunkin::EffectPunkin(CRGB leds[])
   Serial.println("EffectPunkin constructor called");
 }
 
-EffectPunkin::~EffectPunkin()
-{
-  
-}
+// Destructor of EffectPunkin class
+EffectPunkin::~EffectPunkin() {}
+
 
 void EffectPunkin::setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA)
 {
@@ -633,6 +752,7 @@ void EffectPunkin::setupPalette( CRGB A, CRGB AB, CRGB B, CRGB BA)
                       );
 }
 
+// Punkin's main loop
 void EffectPunkin::loop()
 {
   startIndex += 1;  // higher = faster motion
@@ -643,18 +763,23 @@ void EffectPunkin::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                               EffectBpm class                              *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectBpm class
 EffectBpm::EffectBpm(CRGB leds[], uint8_t& gHue)
-	: Effect(leds), gHue(gHue)
+	: Effect(leds, "BPM"), gHue(gHue)
 {
 	Serial.println("EffectBpm constructor called");
 }
 
-EffectBpm::~EffectBpm()
-{
+// Destructor of EffectBpm class
+EffectBpm::~EffectBpm() {}
 
-}
-
+// Bpm's main loop
 void EffectBpm::loop()
 {
   uint8_t BeatsPerMinute = 62;
@@ -666,18 +791,23 @@ void EffectBpm::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                         EffectCyclonRainbow class                          *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectCyclonRainbow class
 EffectCyclonRainbow::EffectCyclonRainbow(CRGB leds[])
-	: Effect(leds), cyclonHue(0), cyclonPos(0), forwards(false)
+	: Effect(leds, "Cyclon Rainbow"), cyclonHue(0), cyclonPos(0), forwards(false)
 {
 	Serial.println("EffectCyclonRainbow constructor called");
 }
 
-EffectCyclonRainbow::~EffectCyclonRainbow()
-{
+// Destructor of EffectCyclonRainbow class
+EffectCyclonRainbow::~EffectCyclonRainbow() {}
 
-}
-
+// Cyclon Rainbow's main loop
 void EffectCyclonRainbow::loop()
 {
   for(int a = 0; a < NUM_LEDS; a++) {
@@ -702,18 +832,23 @@ void EffectCyclonRainbow::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                              EffectDots class                              *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectDots class
 EffectDots::EffectDots(CRGB leds[], uint8_t& bpm, uint8_t& fadeval)
-	: Effect(leds), bpm(bpm), fadeval(fadeval)
+	: Effect(leds, "Dots"), bpm(bpm), fadeval(fadeval)
 {
 	Serial.println("EffectDots constructor called");
 }
 
-EffectDots::~EffectDots()
-{
+// Destructor of EffectDots class
+EffectDots::~EffectDots() {}
 
-}
-
+// Dots' main loop
 void EffectDots::loop()
 {
   uint16_t inner = beatsin16(bpm, NUM_LEDS / 4, NUM_LEDS / 4 * 3);
@@ -726,18 +861,23 @@ void EffectDots::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                           EffectLightning class                            *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectLightning class
 EffectLightning::EffectLightning(CRGB leds[])
-	: Effect(leds), ledstart(0), ledlen(0), lightningFlashTime(0), lightningFlashDelay(0), dimmer(1), flashes(8), frequency(50)
+	: Effect(leds, "Lightning"), ledstart(0), ledlen(0), lightningFlashTime(0), lightningFlashDelay(0), dimmer(1), flashes(8), frequency(50)
 {
 	Serial.println("EffectLightning constructor called");
 }
 
-EffectLightning::~EffectLightning()
-{
+// Destructor of EffectLightning class
+EffectLightning::~EffectLightning() {}
 
-}
-
+// Lightning's main loop
 void EffectLightning::loop()
 {
   ledstart = random16(NUM_LEDS);           // Determine starting location of flash
@@ -761,19 +901,27 @@ void EffectLightning::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                           EffectPoliceAll class                            *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectPoliceAll class
 EffectPoliceAll::EffectPoliceAll(CRGB leds[])
-	: Effect(leds), idex(0), thishuepolice(0), thissat(255)
+	: Effect(leds, "Police All"), idex(0), thishuepolice(0), thissat(255)
 {
 
   Serial.println("EffectPoliceAll constructor called");
 }
 
+// Destructor of EffectPoliceAll class
 EffectPoliceAll::~EffectPoliceAll()
 {
   
 }
 
+// Police All's main loop
 void EffectPoliceAll::loop()
 {
   idex++;
@@ -788,19 +936,24 @@ void EffectPoliceAll::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                           EffectPoliceOne class                            *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectPoliceOne class
 EffectPoliceOne::EffectPoliceOne(CRGB leds[])
-	: Effect(leds), idex(0), thishuepolice(0), thissat(255)
+	: Effect(leds, "Police One"), idex(0), thishuepolice(0), thissat(255)
 {
 
   Serial.println("EffectPoliceOne constructor called");
 }
 
-EffectPoliceOne::~EffectPoliceOne()
-{
-  
-}
+// Destructor of EffectPoliceOne class
+EffectPoliceOne::~EffectPoliceOne() {}
 
+// Police One's main loop
 void EffectPoliceOne::loop()
 {
   idex++;
@@ -824,19 +977,24 @@ void EffectPoliceOne::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                             EffectRainbow class                            *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectRainbow class
 EffectRainbow::EffectRainbow(CRGB leds[])
-	: Effect(leds), thishue(0), deltahue(10)
+	: Effect(leds, "Rainbow"), thishue(0), deltahue(10)
 {
 
   Serial.println("EffectRainbow constructor called");
 }
 
-EffectRainbow::~EffectRainbow()
-{
-  
-}
+// Destructor of EffectRainbow class
+EffectRainbow::~EffectRainbow() {}
 
+// Rainbow's main loop
 void EffectRainbow::loop()
 {
   thishue++;
@@ -844,18 +1002,22 @@ void EffectRainbow::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                         EffectGlitterRainbow class                         *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectGlitterRainbow class
 EffectGlitterRainbow::EffectGlitterRainbow(CRGB leds[])
-	: Effect(leds), thishue(0), deltahue(10)
+	: Effect(leds, "Glitter Rainbow"), thishue(0), deltahue(10)
 {
 
   Serial.println("EffectGlitterRainbow constructor called");
 }
 
-EffectGlitterRainbow::~EffectGlitterRainbow()
-{
-  
-}
+// Destructor of EffectRainbow class
+EffectGlitterRainbow::~EffectGlitterRainbow() {}
 
 void EffectGlitterRainbow::addGlitter( fract8 chanceOfGlitter)
 {
@@ -864,6 +1026,7 @@ void EffectGlitterRainbow::addGlitter( fract8 chanceOfGlitter)
   }
 }
 
+// Glitter Rainbow's main loop
 void EffectGlitterRainbow::loop()
 {
   thishue++;
@@ -872,19 +1035,24 @@ void EffectGlitterRainbow::loop()
 }
 
 
+/******************************************************************************
+ *                                                                            *
+ *                             EffectTwinkle class                            *
+ *                                                                            *
+ *****************************************************************************/
+
 // Constructor of EffectTwinkle class
 EffectTwinkle::EffectTwinkle(CRGB leds[])
-	: Effect(leds), density(80)
+	: Effect(leds, "Twinkle"), density(80)
 {
 
   Serial.println("EffectTwinkle constructor called");
 }
 
-EffectTwinkle::~EffectTwinkle()
-{
-  
-}
+// Destructor of EffectTwinkle class
+EffectTwinkle::~EffectTwinkle() {}
 
+// Twinkle's main loop
 void EffectTwinkle::loop()
 {
   const CRGB lightcolor(8, 7, 1);
@@ -902,19 +1070,21 @@ void EffectTwinkle::loop()
   }
 }
 
+/******************************************************************************
+ *                                                                            *
+ *                              EffectFire class                              *
+ *                                                                            *
+ * ***************************************************************************/
 
 // Constructor of EffectFire class
 EffectFire::EffectFire(CRGB leds[])
-	: Effect(leds), gReverseDirection(false), gPal(HeatColors_p)
+	: Effect(leds, "Fire"), gReverseDirection(false), gPal(HeatColors_p)
 {
 
   Serial.println("EffectFire constructor called");
 }
 
-EffectFire::~EffectFire()
-{
-  
-}
+EffectFire::~EffectFire() {}
 
 
 void EffectFire::resetStripe()

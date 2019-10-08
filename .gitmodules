@@ -13,3 +13,6 @@
 [submodule "libraries/ESPAsyncUDP"]
 	path = libraries/ESPAsyncUDP
 	url = https://github.com/me-no-dev/ESPAsyncUDP.git
+[submodule "libraries/RotaryEncoder"]
+	path = libraries/RotaryEncoder
+	url = https://github.com/mathertel/RotaryEncoder.git

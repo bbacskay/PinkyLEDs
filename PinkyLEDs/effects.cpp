@@ -676,7 +676,7 @@ void EffectHail::loop()
 
 // Constructor of EffectTouchdown class
 EffectTouchdown::EffectTouchdown(CRGB leds[])
-	: Effect(leds, "Touchdown"), idex(0), thishuetouch(0), thissat(255)
+	: Effect(leds, "Touchdown"), idex(0), thishuetouch(64), thissat(255)
 {
 
   Serial.println("EffectTouchdown constructor called");
@@ -697,6 +697,8 @@ void EffectTouchdown::loop()
   int thathue = (thishuetouch + 96) % 255;
   m_Leds[idexY] = CHSV(thishuetouch, thissat, 255);
   m_Leds[idexB] = CHSV(thathue, thissat, 255);
+
+  FastLED.delay(1);
 }
 
 

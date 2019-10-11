@@ -17,7 +17,16 @@
 
 #ifdef ENABLE_E131
   #include <ESPAsyncE131.h>
+
+  #if (UNIVERSE_START < 1) || (UNIVERSE_START > 63999)
+    #error "UNIVERSE_START has to be 1 - 63999, check config.h"
+  #endif
 #endif
+
+#if defined(LED_BUILTIN) || defined(FORCE_USE_LED_BUILTIN)
+  #define USE_LED_BUILTIN 1
+#endif
+
 
 #define VERSION "0.8.99dev"
 
@@ -31,7 +40,8 @@
   #define HW_PLATFORM "other"
 #endif
 
-#define VERSION_FULL VERSION " " HW_PLATFORM
+//#define VERSION_FULL VERSION " " HW_PLATFORM
+#define VERSION_FULL VERSION " " ARDUINO_VARIANT
 
 #ifdef ESP32
   #define LED_ON HIGH
@@ -105,6 +115,9 @@ const char effectList[][20] = { "Confetti",
                                 "Glitter Rainbow",
                                 "Ripple",
                                 "Twinkle"
+                                #ifdef ENABLE_E131
+                                , "E131"
+                                #endif
                               };
 
 
@@ -161,8 +174,8 @@ const char effectList[][20] = { "Confetti",
 
 #endif
 #ifdef ENABLE_E131
-  #if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3001000)
-    #warning "Requires FastLED 3.1 or later; check github for latest code."
+  #if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3003002)
+    #warning "Requires FastLED 3.3.2 or later; check github for latest code."
   #endif
 #endif
 
@@ -222,7 +235,7 @@ PubSubClient client(espClient);  // this needs to be unique for each controller
 long lastReconnectAttempt = 0;
 
 #ifdef ENABLE_E131
-  ESPAsyncE131 e131(1);
+  ESPAsyncE131 e131(2);
 #endif
 
 
@@ -494,9 +507,9 @@ void setup_wifi() {
   WiFi.mode(WIFI_STA);
 
   #ifdef ESP32
-  WiFi.setHostname(DEVICE_NAME);
+    WiFi.setHostname(DEVICE_NAME);
   #else
-  WiFi.hostname(DEVICE_NAME);
+    WiFi.hostname(DEVICE_NAME);
   #endif
 
   WiFi.begin(wifi_ssid, wifi_password);
@@ -713,8 +726,9 @@ void setup()
   // Init serial
   Serial.begin(115200);
   // Init digital IO
-  #ifdef LED_BUILTIN
+  #ifdef USE_LED_BUILTIN
     pinMode(LED_BUILTIN, OUTPUT);            // Setup builtin LED
+    #warning "Builtin LED used"
   #endif
   pinMode(POWER_BUTTON_PIN, INPUT_PULLUP);   // Setup power button
   pinMode(COLOR_BUTTON_PIN, INPUT_PULLUP);   // Setup color button
@@ -837,18 +851,54 @@ void loop()
 
 #ifdef ENABLE_E131
   if (setEffect == eEffects::E131 && setPower == "ON") {
-    #ifdef LED_BUILTIN
-      digitalWrite(BUILTIN_LED, LED_ON);
+    #ifdef USE_LED_BUILTIN
+      digitalWrite(LED_BUILTIN, LED_ON);
     #endif
     if (!e131.isEmpty()) {
       e131_packet_t packet;
       e131.pull(&packet);     // Pull packet from ring buffer
-      for (int i = 0; i < NUM_LEDS; i++) {
-        int j = i * 3 + (CHANNEL_START);
-        leds[i].setRGB(packet.property_values[j], packet.property_values[j + 1], packet.property_values[j + 2]);
+      
+      // Calculate the required number of Universes
+      uint16_t universeReq = (NUM_LEDS / 170);
+      if ( (NUM_LEDS % 170) > 0 )
+      {
+        universeReq++;
       }
-      FastLED.setBrightness(255);
-      FastLED.show();
+
+      uint16_t universe = htons(packet.universe);
+      uint16_t universeLast = universe + universeReq - 1;
+      uint16_t maxChannels = htons(packet.property_value_count) - 1;
+
+      if ( universe >= UNIVERSE_START ) 
+      {
+        // Calculate LED range to update
+        uint16_t firstLed = ((universe - UNIVERSE_START) * 170);
+        uint16_t lastLed  = firstLed + (maxChannels / 3);  // -1
+
+        #ifdef DEBUG
+          Serial.printf("Universe %u / %u Channels | Packet#: %u / Errors: %u / FirstLed: %3u/ LastLed: %3u / CH1: %3u / CH2: %3u / CH3: %3u\n",
+                  universe,                               // The Universe for this packet
+                  maxChannels,                            // Start code is ignored, we're interested in dimmer data
+                  e131.stats.num_packets,                 // Packet counter
+                  e131.stats.packet_errors,               // Packet error counter
+                  firstLed,                               // First LED to update
+                  lastLed-1,                              // Last LED to update
+                  packet.property_values[1],              // Dimmer data for Channel 1
+                  packet.property_values[2],              // Dimmer data for Channel 2
+                  packet.property_values[3]);             // Dimmer data for Channel 3
+        #endif
+
+        int j = 1;
+        for (int i = firstLed; i < min(lastLed,(uint16_t)NUM_LEDS); i++)
+        {
+          // Calculate channel
+          leds[i].setRGB(packet.property_values[j], packet.property_values[j + 1], packet.property_values[j + 2]);
+          j += 3;
+        }
+
+        FastLED.setBrightness(255);
+        FastLED.show();
+      }
     }
   } else
 #endif
@@ -861,14 +911,14 @@ void loop()
     static bool flashOff = false;
 
     if (setPower == "OFF") {
-      #ifdef LED_BUILTIN
+      #ifdef USE_LED_BUILTIN
         digitalWrite(LED_BUILTIN, LED_OFF);
       #endif
       for ( int i = 0; i < NUM_LEDS; i++) {
         leds[i].fadeToBlackBy( 8 );   //FADE OFF LEDS
       }
     } else {
-      #ifdef LED_BUILTIN
+      #ifdef USE_LED_BUILTIN
         digitalWrite(LED_BUILTIN, LED_ON);
       #endif
       static unsigned int flashDelay = 0;

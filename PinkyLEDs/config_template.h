@@ -1,38 +1,51 @@
 #pragma once
+// For more Information on this configuration file, please see the Wiki
+// (https://github.com/pinkywafer/PinkyLEDs/wiki)
 
-#define DEVICE_NAME "PinkyLED1" // Unique name for this device
-#define USE_DISCOVERY // remove if you do not want to use auto-discovery
-#define USE_WHITE_BALANCE_FOR_SPEED // remove if you do not want to use Home Assistant's built in white balance slider for animation speed
-//#define ENABLE_E131 // remove if you do not want to use E1.31
+//    REQUIRED CONFIGURATION     
+// WIFI //
+#define WIFI_SSID     "yourSSID"         // your WIFI SSID
+#define WIFI_PASSWORD "yourWiFiPassword" // your WIFI Password
+// MQTT //
+#define MQTT_BROKER   "MQTTipAddress"    // your MQTT broker address or IP.
+#define MQTT_PORT     1883               // your MQTT port (usually 1883 for unencrypted connection)
+#define MQTT_USERNAME "MQTTuser"         // your MQTT username
+#define MQTT_PASSWORD "MQTTpassword"     // your MQTT password
 
-#define wifi_ssid "yourSSID" // your WIFI SSID
-#define wifi_password "yourWiFiPassword" // your WIFI Password
+//DEVICE CONFIG //
+#define DEVICE_NAME   "PinkyLED1"        // Unique name for this device
+#define LED_TYPE      WS2812             // your LED type WS2812 / WS2811
+#define COLOR_ORDER   GRB                // your color order (normally: RGB for WS2811 | GRB for WS2812)
+#define NUM_LEDS      150                // number of LEDs in your strip
 
-#define mqtt_server "IP_Address" // your MQTT broker hostname or IP.
-#define mqtt_port 1883
-#define mqtt_user "MQTT_USER" //enter your MQTT username
-#define mqtt_password "MQTTPASSWORD" //enter your MQTT password
-#define mqtt_group_topic "cmnd/PinkyLEDs" // MQTT group topic to allow controlling multiple controllers with a single mqtt command
+#define OTA_PASSWORD   "OTA_PASSWORD"    //the password you will need to enter to upload remotely via the ArduinoIDE
 
-#define LED_TYPE    WS2812 // your LED type WS2812 / WS2811
-#define COLOR_ORDER GRB // your color order (normally: RGB for WS2811 | GRB for WS2812)
-#define NUM_LEDS    150 // number of LEDs in your strip
+//            OPTIONS              
+#define USE_DISCOVERY                     // remove if you do not want to use auto-discovery
+#define USE_WHITE_BALANCE_FOR_SPEED       // remove if you do not want to use Home Assistant's built in white balance slider for animation speed
+#define MQTT_GROUP_TOPIC "cmnd/PinkyLEDs" // MQTT group topic set to your own choice of group or remove if not wanted
+#define ENABLE_E131                       // remove if you do not want to use E1.31
+#define UNIVERSE_START 1                  // first universe to listen for for E1.31 (remove if not using E1.31
 
 // Different pin configurations for ESP32 and ESP8266
 #if defined(ARDUINO_ESP8266_NODEMCU) || defined(ARDUINO_ESP8266_WEMOS_D1MINI)
-  #define DATA_PIN          D1  // the pin the LEDs are connected to.
-  #define POWER_BUTTON_PIN  D6  // pin the Power button is connected to.  If not using the button, leave it as it is
-  #define COLOR_BUTTON_PIN  D7  // pin the Color button is connected to.  If not using the button, leave it as it is
-  #define EFFECT_BUTTON_PIN 3   // pin the Effects button is connected to.  If not using the button, leave it as it is
+  #define DATA_PIN          D1             // the pin the LEDs are connected to.
+  #define POWER_BUTTON_PIN  D6             // pin the Power button is connected to.  If not using the button, leave it as it is
+  #define COLOR_BUTTON_PIN  D7             // pin the Color button is connected to.  If not using the button, leave it as it is
+  #define EFFECT_BUTTON_PIN 3              // pin the Effects button is connected to.  If not using the button, leave it as it is
 #elif defined(ESP32)
-  #define DATA_PIN          23  // the pin the LEDs are connected to.
-  #define POWER_BUTTON_PIN  18  // pin the Power button is connected to.  If not using the button, leave it as it is
-  #define COLOR_BUTTON_PIN  19  // pin the Color button is connected to.  If not using the button, leave it as it is
-  #define EFFECT_BUTTON_PIN 21  // pin the Effects button is connected to.  If not using the button, leave it as it is (3 is RX pin on D1 mini)
+  #define DATA_PIN          23              // Pin the LEDs are connected to
+  #define POWER_BUTTON_PIN  18              // The pin your power button is connected to (Remove if not using power button)
+  #define COLOR_BUTTON_PIN  19              // pin the Color button is connected to (Remove if not using color button)
+  #define EFFECT_BUTTON_PIN 21              // pin the Effects button is connected to (Remove if not using effect button)
+  #define BRIGHTNESS_ENCODER_DT 25          // The pin your Brightness encoder DT is connected to (Remove if not using brightness encoder)
+  #define BRIGHTNESS_ENCODER_CLK 26         // The pin your Brightness encoder CLK is connected to (Remove if not using brightness encoder)
+  #define SPEED_ENCODER_DT 32               // The pin your Speed encoder DT is connected to (Remove if not using Speed encoder)
+  #define SPEED_ENCODER_CLK 33              // The pin your Speed encoder CLK is connected to (Remove if not using Speed encoder)
+
 #endif
 
-#define OTApassword "OTApassword" //the password you will need to enter to upload remotely via the ArduinoIDE
-
-#define CHANNEL_START 1  // number of first channel for E1.31
+#define BRIGHTNESS_ENCODER_LESS_STEPS     // reduces the steps needed for the brightness encoder (remove if encoder is too responsive)
+#define SPEED_ENCODER_LESS_STEPS          // reduces the steps needed for the speed encoder (remove if encoder is too responsive)
 
 //#define DEBUG 1

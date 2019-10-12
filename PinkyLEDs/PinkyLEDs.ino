@@ -10,7 +10,7 @@
  *      |         |   |      |   |   \         /     |       |_______  |_____/      \_____/ 
  *   \________________________________________/      |________________________________________/
  */
-#define VERSION "0.8.99dev"
+#define VERSION "0.9.4dev"
 
 #include <ArduinoJson.h>
 #ifdef ESP32
@@ -267,7 +267,8 @@ PubSubClient client(espClient);  // this needs to be unique for each controller
 long lastReconnectAttempt = 0;
 
 #ifdef ENABLE_E131
-  ESPAsyncE131 e131(2);
+  uint16_t universesRequired;
+  ESPAsyncE131* e131;
 #endif
 
 
@@ -924,7 +925,16 @@ void setup()
   #endif
 
   #ifdef ENABLE_E131
-    e131.begin(E131_UNICAST);
+    if ( (NUM_LEDS % 170) > 0 ){
+      universesRequired = (NUM_LEDS / 170);
+    } else {
+      universesRequired = (NUM_LEDS / 170) + 1;
+    }
+    e131 = new ESPAsyncE131(universesRequired);
+    e131->begin(E131_UNICAST);
+    #ifdef DEBUG 
+      Serial.printf("E131 buffer initialised with %u Buffers\n", universesRequired); 
+    #endif
   #endif
 
   Serial.println("Effect's list:");
@@ -994,19 +1004,12 @@ void loop()
     #ifdef USE_LED_BUILTIN
       digitalWrite(LED_BUILTIN, LED_ON);
     #endif
-    if (!e131.isEmpty()) {
+    if (!e131->isEmpty()) {
       e131_packet_t packet;
-      e131.pull(&packet);     // Pull packet from ring buffer
+      e131->pull(&packet);     // Pull packet from ring buffer
       
-      // Calculate the required number of Universes
-      uint16_t universeReq = (NUM_LEDS / 170);
-      if ( (NUM_LEDS % 170) > 0 )
-      {
-        universeReq++;
-      }
-
       uint16_t universe = htons(packet.universe);
-      uint16_t universeLast = universe + universeReq - 1;
+      uint16_t universeLast = universe + universesRequired - 1;
       uint16_t maxChannels = htons(packet.property_value_count) - 1;
 
       if ( universe >= UNIVERSE_START ) 
@@ -1017,15 +1020,15 @@ void loop()
 
         #ifdef DEBUG
           Serial.printf("Universe %u / %u Channels | Packet#: %u / Errors: %u / FirstLed: %3u/ LastLed: %3u / CH1: %3u / CH2: %3u / CH3: %3u\n",
-                  universe,                               // The Universe for this packet
-                  maxChannels,                            // Start code is ignored, we're interested in dimmer data
-                  e131.stats.num_packets,                 // Packet counter
-                  e131.stats.packet_errors,               // Packet error counter
-                  firstLed,                               // First LED to update
-                  lastLed-1,                              // Last LED to update
-                  packet.property_values[1],              // Dimmer data for Channel 1
-                  packet.property_values[2],              // Dimmer data for Channel 2
-                  packet.property_values[3]);             // Dimmer data for Channel 3
+                    universe,                               // The Universe for this packet
+                    maxChannels,                            // Start code is ignored, we're interested in dimmer data
+                    e131->stats.num_packets,                // Packet counter
+                    e131->stats.packet_errors,              // Packet error counter
+                    firstLed,                               // First LED to update
+                    lastLed-1,                              // Last LED to update
+                    packet.property_values[1],              // Dimmer data for Channel 1
+                    packet.property_values[2],              // Dimmer data for Channel 2
+                    packet.property_values[3]);             // Dimmer data for Channel 3
         #endif
 
         int j = 1;

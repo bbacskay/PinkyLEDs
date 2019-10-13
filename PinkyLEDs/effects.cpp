@@ -1149,3 +1149,47 @@ void EffectFire::loop()
   }
 
 }
+
+/******************************************************************************
+ *                                                                            *
+ *                              EffectRipple class                            *
+ *                                                                            *
+ *****************************************************************************/
+
+// Constructor of EffectTwinkle class
+EffectRipple::EffectRipple(CRGB leds[])
+	: Effect(leds, "Ripple"), colour(0), center(0), step(-1), bgcol(0), myfade(255)
+{
+
+  Serial.println("EffectRipple constructor called");
+}
+
+// Destructor of EffectRipple class
+EffectRipple::~EffectRipple() {}
+
+// Ripple's main loop
+void EffectRipple::loop()
+{
+  EVERY_N_MILLISECONDS(10) {
+    for (int i = 0; i < NUM_LEDS; i++) m_Leds[i] = CHSV(bgcol++, 255, 15);  // Rotate background colour.
+    switch (step) {
+      case -1:                                                          // Initialize ripple variables.
+        center = random(NUM_LEDS);
+        colour = random8();
+        step = 0;
+        break;
+      case 0:
+        m_Leds[center] = CHSV(colour, 255, 255);                        // Display the first pixel of the ripple.
+        step ++;
+        break;
+      case MAX_STEPS:                                                   // At the end of the ripples.
+        step = -1;
+        break;
+      default:                                                             // Middle of the ripples.
+        m_Leds[(center + step + NUM_LEDS) % NUM_LEDS] += CHSV(colour, 255, myfade / step * 2);   // Simple wrap from Marc Miller
+        m_Leds[(center - step + NUM_LEDS) % NUM_LEDS] += CHSV(colour, 255, myfade / step * 2);
+        step ++;                                                         // Next step.
+        break;
+    }
+  }
+}

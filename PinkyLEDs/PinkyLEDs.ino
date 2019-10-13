@@ -233,32 +233,13 @@ bool startupMQTTconnect = true;
 /*****************For TWINKLE********/
 int twinklecounter = 0;
 
-/*********FOR RIPPLE***********/
-uint8_t colour;                                               // Ripple colour is randomized.
-int center = 0;                                               // Center of the current ripple.
-int step = -1;                                                // -1 is the initializing step.
-uint8_t myfade = 255;                                         // Starting brightness.
-#define maxsteps 16                                           // Case statement wouldn't allow a variable.
-uint8_t bgcol = 0;                                            // Background colour rotates.
-int thisdelay = 20;                                           // Standard delay value.
-
-/**************FOR RAINBOW***********/
-uint8_t thishue = 0;                                          // Starting hue value.
-uint8_t deltahue = 10;
-
 /**************FOR DOTS**************/
 uint8_t fadeval = 224;                                        // Trail behind the LED's. Lower => faster fade.
 uint8_t bpm = 30;
 
 
-//////////////////add thishue__ for Police All custom effects here/////////////////////////////////////////////////////////
-/////////////////use hsv Hue number for one color, for second color change "thishue__ + __" in the setEffect section//////
-
-
-
 /********BPM**********/
 uint8_t gHue = 0;
-char message_buff[100];
 
 
 WiFiClient espClient;            // this needs to be unique for each controller
@@ -302,6 +283,7 @@ EffectPoliceAll      effectPoliceAll(leds);
 EffectPoliceOne      effectPoliceOne(leds);
 EffectRainbow        effectRainbow(leds);
 EffectGlitterRainbow effectGlitterRainbow(leds);
+EffectRipple         effectRipple(leds);
 EffectTwinkle        effectTwinkle(leds);
 EffectFire           effectFire(leds);
 
@@ -336,7 +318,7 @@ Effect* effectArray[] = {
                           &effectPoliceOne,
                           &effectRainbow,
                           &effectGlitterRainbow,
-                          //&effectRipple,
+                          &effectRipple,
                           &effectTwinkle
 };
 
@@ -702,7 +684,7 @@ boolean reconnect() {
           } else { //if off turn on
             setPower = "ON";
           }
-          // publishState();  ToDo uncomment
+          publishState();
           Serial.println("Button press - Set Power: " + setPower);
         }
       }
@@ -938,7 +920,7 @@ void setup()
   #endif
 
   Serial.println("Effect's list:");
-  for (int i=0; i<31; i++)
+  for (int i=0; i<32; i++)
   {
     Serial.print(i);
     Serial.print(" - ");
@@ -1205,6 +1187,10 @@ void loop()
           effectGlitterRainbow.loop();
           break;
 
+        case eEffects::Ripple:
+          effectRipple.loop();
+          break;
+
         case eEffects::Twinkle:
           // Resets strip if previous animation was running
           if ( prevEffect != eEffects::Twinkle )
@@ -1226,28 +1212,6 @@ void loop()
       
         gHue++;
 
-        if (setEffect == eEffects::Ripple) {
-          for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(bgcol++, 255, 15);  // Rotate background colour.
-          switch (step) {
-            case -1:                                                          // Initialize ripple variables.
-              center = random(NUM_LEDS);
-              colour = random8();
-              step = 0;
-              break;
-            case 0:
-              leds[center] = CHSV(colour, 255, 255);                          // Display the first pixel of the ripple.
-              step ++;
-              break;
-            case maxsteps:                                                    // At the end of the ripples.
-              step = -1;
-              break;
-            default:                                                             // Middle of the ripples.
-              leds[(center + step + NUM_LEDS) % NUM_LEDS] += CHSV(colour, 255, myfade / step * 2);   // Simple wrap from Marc Miller
-              leds[(center - step + NUM_LEDS) % NUM_LEDS] += CHSV(colour, 255, myfade / step * 2);
-              step ++;                                                         // Next step.
-              break;
-          }
-        }
       }
 
     }

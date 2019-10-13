@@ -552,10 +552,29 @@ public:
   void loop();
 
 private:
-  //static const String m_Name;
 
   bool gReverseDirection;
   uint8_t heat[NUM_LEDS];  // Array of temperature readings at each simulation cell
   CRGBPalette16 gPal;
+
+};
+
+
+#define MAX_STEPS 16                                           // Case statement wouldn't allow a variable.
+class EffectRipple : public Effect
+{
+public:
+  EffectRipple(CRGB leds[]);
+  virtual ~EffectRipple();
+  void loop();
+
+private:
+
+  uint8_t colour;                                               // Ripple colour is randomized.
+  int center;                                                   // Center of the current ripple.
+  int step;                                                     // -1 is the initializing step.
+  uint8_t bgcol;                                                // Background colour rotates.
+  uint8_t myfade;                                               // Starting brightness.
+
 
 };

@@ -45,17 +45,6 @@
   #include <RotaryEncoder.h>
 #endif
 
-#ifdef ARDUINO_ESP8266_NODEMCU
-  #define HW_PLATFORM "NodeMCU"
-#elif defined(ARDUINO_ESP8266_WEMOS_D1MINI)
-  #define HW_PLATFORM "D1 mini"
-#elif defined(ESP32)
-  #define HW_PLATFORM "ESP32"
-#else
-  #define HW_PLATFORM "other"
-#endif
-
-//#define VERSION_FULL VERSION " " HW_PLATFORM
 #define VERSION_FULL VERSION " " ARDUINO_VARIANT
 
 #ifdef ESP32
@@ -67,6 +56,9 @@
 #endif
 
 int OTAport = 8266;
+
+WiFiClient espClient;            // this needs to be unique for each controller
+PubSubClient client(espClient);  // this needs to be unique for each controller
 
 const CRGB colorList[] = {{255,0,0}, {0,255,0}, {0,0,255}, {0,255,127}, {191,255,0},
                         {255,255,255}, {255,255,36}, {255,191,0}, {255,127,0}, {255,163,72},
@@ -144,50 +136,11 @@ const char effectList[][20] = { "Confetti",
   #define SPEEDTOPIC "speed"
   #define WHITE_VALUE "false"
 #endif
-#define mqttcommand "cmnd/" DEVICE_NAME
-#define mqttstate "stat/" DEVICE_NAME
+#define MQTTCOMMAND "cmnd/" DEVICE_NAME
+#define MQTTSTATE "stat/" DEVICE_NAME
 #define LWTTOPIC "LWT/" DEVICE_NAME
 
-#ifdef USE_DISCOVERY
-  #define DISCOVERY_TOPIC "homeassistant/light/" DEVICE_NAME "/config"
-  #define DISCOVERY_BASE "{ \"unique_id\": \"PinkyLED_" DEVICE_NAME "\", " \
-                           "\"device\":{" \
-                            "\"identifiers\":\"" DEVICE_NAME "\", " \
-                            "\"model\": \"generic\", " \
-                            "\"manufacturer\": \"Pinkywafer\", " \
-                            "\"name\": \"" DEVICE_NAME "\", " \
-                            "\"sw_version\": \"" VERSION_FULL "\"" \
-                           "}, " \
-                           "\"name\": \"" DEVICE_NAME "\", " \
-                           "\"platform\": \"mqtt\", " \
-                           "\"schema\": \"json\", " \
-                           "\"state_topic\": \"" mqttstate "\", " \
-                           "\"command_topic\": \"" mqttcommand "\", " \
-                           "\"white_value\": \"" WHITE_VALUE "\", " \
-                           "\"optimistic\": \"false\", " \
-                           "\"availability_topic\": \"" LWTTOPIC "\", " \
-                           "\"payload_available\": \"Online\", " \
-                           "\"payload_not_available\": \"Offline\", " \
-                           "\"rgb\": \"true\", " \
-                           "\"flash_time_short\": \"1\", " \
-                           "\"flash_time_long\": \"5\", " \
-                           "\"brightness\": \"true\", " \
-                           "\"effect\": \"true\", " \
-                           "\"effect_list\": [\"Confetti\", \"Glitter\", \"Juggle\", \"Sinelon\", \"Solid\", " \
-                                             "\"Christmas\", \"Candy Cane\", \"Holly Jolly\", \"Valentine\", \"Lovey Day\", " \
-                                             "\"St Patty\", \"Easter\", \"USA\", \"Independence\", \"Go Blue\", " \
-                                             "\"Hail\", \"Touchdown\", \"Halloween\", \"Punkin\", \"Thanksgiving\", " \
-                                             "\"Turkey Day\", \"BPM\", \"Cyclon Rainbow\", \"Dots\", \"Fire\", " \
-                                             "\"Lightning\", \"Police All\", \"Police One\", \"Rainbow\", \"Glitter Rainbow\", " \
-                                             "\"Ripple\", \"Twinkle\""
-  #ifdef ENABLE_E131
-    #define DISCOVERY_E131 ",\"E131\""
-  #else
-    #define DISCOVERY_E131 ""
-  #endif
-  #define DISCOVERY_PAYLOAD DISCOVERY_BASE DISCOVERY_E131 "] }"
 
-#endif
 #ifdef ENABLE_E131
   #if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3003002)
     #warning "Requires FastLED 3.3.2 or later; check github for latest code."
@@ -242,9 +195,6 @@ uint8_t bpm = 30;
 uint8_t gHue = 0;
 
 
-WiFiClient espClient;            // this needs to be unique for each controller
-PubSubClient client(espClient);  // this needs to be unique for each controller
-
 long lastReconnectAttempt = 0;
 
 #ifdef ENABLE_E131
@@ -272,12 +222,13 @@ EffectGoBlue         effectGoBlue(leds, gHue);
 EffectHail           effectHail(leds);
 EffectTouchdown      effectTouchdown(leds);
 EffectHalloween      effectHalloween(leds, gHue);
-EffectTurkeyDay      effectTurkeyDay(leds, gHue);
 EffectPunkin         effectPunkin(leds);
 EffectThanksgiving   effectThanksgiving(leds);
+EffectTurkeyDay      effectTurkeyDay(leds, gHue);
 EffectBpm            effectBpm(leds, gHue);
 EffectCyclonRainbow  effectCyclonRainbow(leds);
 EffectDots           effectDots(leds, bpm, fadeval);
+EffectFire           effectFire(leds);
 EffectLightning      effectLightning(leds);
 EffectPoliceAll      effectPoliceAll(leds);
 EffectPoliceOne      effectPoliceOne(leds);
@@ -285,7 +236,6 @@ EffectRainbow        effectRainbow(leds);
 EffectGlitterRainbow effectGlitterRainbow(leds);
 EffectRipple         effectRipple(leds);
 EffectTwinkle        effectTwinkle(leds);
-EffectFire           effectFire(leds);
 
 Effect* effectArray[] = {
                           &effectConfetti,
@@ -323,15 +273,90 @@ Effect* effectArray[] = {
 };
 
 
+#ifdef USE_DISCOVERY
+  #define DISCOVERY_TOPIC "homeassistant/light/" DEVICE_NAME "/config"
+
+  void sendDiscovery() {
+    /*
+      Buffer size is calculated with ArduinoJson Assistant
+      https://arduinojson.org/v5/assistant/
+    */
+    
+    uint numOfEffects = sizeof(effectArray)/sizeof(effectArray[0]);
+    #ifdef ENABLE_E131
+      numOfEffects++;
+    #endif
+
+    const size_t capacity = JSON_OBJECT_SIZE(5)  +  // device
+                            JSON_OBJECT_SIZE(18) +  // root
+                            JSON_ARRAY_SIZE(numOfEffects)  +  // effect_list
+                            39 + numOfEffects * 21;  // ToDo: max. length of an effect's name 20 chars + \0
+    DynamicJsonBuffer jsonBuffer(capacity);
+
+    JsonObject& root = jsonBuffer.createObject();
+    root["unique_id"] = "PinkyLED_" DEVICE_NAME;
+
+    JsonObject& device = root.createNestedObject("device");
+    device["identifiers"] = DEVICE_NAME;
+    device["model"] = "generic";
+    device["manufacturer"] = "Pinkywafer";
+    device["name"] = DEVICE_NAME;
+    device["sw_version"] = VERSION_FULL;
+
+    root["name"] = DEVICE_NAME;
+    root["platform"] = "mqtt";
+    root["schema"] = "json";
+    root["state_topic"] = MQTTSTATE;
+    root["command_topic"] = MQTTCOMMAND;
+    root["white_value"] = "true";
+    root["optimistic"] = "false";
+    root["availability_topic"] = LWTTOPIC;
+    root["payload_available"] = "Online";
+    root["payload_not_available"] = "Offline";
+    root["rgb"] = "true";
+    root["flash_time_short"] = "1";
+    root["flash_time_long"] = "5";
+    root["brightness"] = "true";
+    root["effect"] = "true";
+
+    JsonArray& effect_list = root.createNestedArray("effect_list");
+    for (uint i=0;i < sizeof(effectArray)/sizeof(effectArray[0]); i++)
+    {
+      effect_list.add(effectArray[i]->GetEffectName());
+    }
+
+    #ifdef ENABLE_E131
+      effect_list.add("E131");
+    #endif
+
+    int jsonBufferSize = root.measureLength();
+    char b[jsonBufferSize];
+    #ifdef DEBUG
+      Serial.printf("Discover JSON buffer size: %i\n", jsonBufferSize);
+      root.printTo(Serial);
+      Serial.printf("\n");
+    #endif
+
+    root.printTo(b, jsonBufferSize);
+    
+    client.beginPublish(DISCOVERY_TOPIC,jsonBufferSize,true);
+    client.write((uint8_t*)b,jsonBufferSize);
+    client.endPublish();
+    
+  }
+
+#endif
+
+
 void callback(char* topic, byte* payload, unsigned int length) {
   char message[length + 1];
   Serial.print("MQTT message received ");
   for (int i = 0; i < length; i++) {
     message[i] = (char)payload[i];
   }
-  if (String(topic) == mqttstate){
+  if (String(topic) == MQTTSTATE){
     Serial.println("State message - Unsubscribing from state topic");
-    client.unsubscribe(mqttstate);
+    client.unsubscribe(MQTTSTATE);
   }
   message[length] = '\0';
   Serial.println(message);
@@ -601,7 +626,7 @@ void publishState() {
   #ifdef DEBUG
     Serial.println("Done");
   #endif
-  client.beginPublish(mqttstate,sizeof(buffer)-1,true);
+  client.beginPublish(MQTTSTATE,sizeof(buffer)-1,true);
   client.write(buffer,sizeof(buffer)-1);
   client.endPublish();
   #ifdef DEBUG
@@ -624,21 +649,18 @@ boolean reconnect() {
     Serial.println("connected");
     client.publish(LWTTOPIC, "Online", true);
     #ifdef USE_DISCOVERY
-      byte b[] = DISCOVERY_PAYLOAD;
-      client.beginPublish(DISCOVERY_TOPIC,sizeof(b)-1,true);
-      client.write(b,sizeof(b)-1);
-      client.endPublish();
+      sendDiscovery();
       #ifdef DEBUG
         Serial.println("Discovery message sent");
       #endif
     #endif
-    client.subscribe(mqttcommand);
+    client.subscribe(MQTTCOMMAND);
     client.subscribe(MQTT_GROUP_TOPIC);
     #ifdef DEBUG
       Serial.println("Subscribed to MQTT topics");
     #endif
     if (startupMQTTconnect) {
-      client.subscribe(mqttstate);
+      client.subscribe(MQTTSTATE);
       startupMQTTconnect = false;
       #ifdef DEBUG
         Serial.println("Subscribed to MQTT State topic");
@@ -908,9 +930,9 @@ void setup()
 
   #ifdef ENABLE_E131
     if ( (NUM_LEDS % 170) > 0 ){
-      universesRequired = (NUM_LEDS / 170);
-    } else {
       universesRequired = (NUM_LEDS / 170) + 1;
+    } else {
+      universesRequired = (NUM_LEDS / 170);
     }
     e131 = new ESPAsyncE131(universesRequired);
     e131->begin(E131_UNICAST);

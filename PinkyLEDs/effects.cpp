@@ -853,8 +853,8 @@ void EffectCyclonRainbow::loop()
  *****************************************************************************/
 
 // Constructor of EffectDots class
-EffectDots::EffectDots(CRGB leds[], uint8_t& bpm, uint8_t& fadeval)
-	: Effect(leds, "Dots"), bpm(bpm), fadeval(fadeval)
+EffectDots::EffectDots(CRGB leds[])
+	: Effect(leds, "Dots")
 {
 	Serial.println("EffectDots constructor called");
 }

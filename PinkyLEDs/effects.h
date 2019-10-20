@@ -422,16 +422,17 @@ private:
 class EffectDots : public Effect
 {
 public:
-  EffectDots(CRGB leds[], uint8_t&, uint8_t&);
+  EffectDots(CRGB leds[]);
   virtual ~EffectDots();
   void loop();
 
 private:
   static const String m_Name;
 
-  uint8_t& bpm;
-  uint8_t& fadeval;
-
+  //uint8_t& bpm;
+  //uint8_t& fadeval;
+  const uint8_t bpm = 30;
+  const uint8_t fadeval = 224;    // Trail behind the LED's. Lower => faster fade.
 };
 
 

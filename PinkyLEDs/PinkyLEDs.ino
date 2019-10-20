@@ -186,10 +186,6 @@ bool startupMQTTconnect = true;
 /*****************For TWINKLE********/
 int twinklecounter = 0;
 
-/**************FOR DOTS**************/
-uint8_t fadeval = 224;                                        // Trail behind the LED's. Lower => faster fade.
-uint8_t bpm = 30;
-
 
 /********BPM**********/
 uint8_t gHue = 0;
@@ -202,6 +198,9 @@ long lastReconnectAttempt = 0;
   ESPAsyncE131* e131;
 #endif
 
+#ifdef DEBUG_MEM
+  unsigned int debugTime;
+#endif
 
 // Define effects
 EffectConfetti       effectConfetti(leds, Rcolor, Gcolor, Bcolor);
@@ -227,7 +226,7 @@ EffectThanksgiving   effectThanksgiving(leds);
 EffectTurkeyDay      effectTurkeyDay(leds, gHue);
 EffectBpm            effectBpm(leds, gHue);
 EffectCyclonRainbow  effectCyclonRainbow(leds);
-EffectDots           effectDots(leds, bpm, fadeval);
+EffectDots           effectDots(leds);
 EffectFire           effectFire(leds);
 EffectLightning      effectLightning(leds);
 EffectPoliceAll      effectPoliceAll(leds);
@@ -1261,6 +1260,23 @@ void loop()
           FastLED.delay(1600);
       }
     }
+
+    #ifdef DEBUG_MEM
+    if ( millis() - debugTime > 5000 ) {
+      Serial.print("FreeHeap: ");
+      Serial.print(ESP.getFreeHeap());
+      #if defined(ESP8266)
+        Serial.print(" HeapFragmentation: ");
+        Serial.print(ESP.getHeapFragmentation());
+        Serial.print(" MaxFreeBlockSize: ");
+        Serial.println(ESP.getMaxFreeBlockSize());
+      #elif defined(ESP32)
+        Serial.print(" MaxAllocHeap: ");
+        Serial.println(ESP.getMaxAllocHeap());
+      #endif
+      debugTime = millis();
+    }
+  #endif
 
     #ifdef DEBUG_FPS
       Serial.print("FPS: ");

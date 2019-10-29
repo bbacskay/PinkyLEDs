@@ -1193,3 +1193,99 @@ void EffectRipple::loop()
     }
   }
 }
+
+
+/******************************************************************************
+ *                                                                            *
+ *                               EffectE131 class                             *
+ *                                                                            *
+ *****************************************************************************/
+
+#ifdef ENABLE_E131
+// Constructor of Effect131 class
+EffectE131::EffectE131(CRGB leds[])
+	: Effect(leds, "E131")
+{
+  if ( (NUM_LEDS % 170) > 0 ){
+    universesRequired = (NUM_LEDS / 170) + 1;
+  } else {
+    universesRequired = (NUM_LEDS / 170);
+  }
+  
+  e131 = new ESPAsyncE131(universesRequired+2);   // Number of buffers should be at least the number of universes
+
+  Serial.println("Effect131 constructor called");
+}
+
+// Destructor of EffectRipple class
+EffectE131::~EffectE131() {
+  delete(e131);
+}
+
+void EffectE131::setup() {
+  #ifdef MULTICAST_MODE
+    e131->begin(E131_MULTICAST,UNIVERSE_START,universesRequired);
+  #else
+    e131->begin(E131_UNICAST);
+  #endif
+  #ifdef DEBUG 
+    Serial.printf("E131 buffer initialised with %u Buffers\n", universesRequired); 
+  #endif
+}
+
+void EffectE131::resetStripe() {
+  FastLED.clear(true);
+  #ifdef DEBUG
+    Serial.println("LEDs Cleared.  Ready for E1.31");
+  #endif
+  FastLED.show();
+}
+
+void EffectE131::loop() {
+    if (!e131->isEmpty()) {
+      e131_packet_t packet;
+      e131->pull(&packet);     // Pull packet from ring buffer
+      
+      uint16_t universe = htons(packet.universe);
+      uint16_t universeLast = universe + universesRequired - 1;
+      uint16_t maxChannels = htons(packet.property_value_count) - 1;
+
+      if ( universe >= UNIVERSE_START ) 
+      {
+        // Calculate LED range to update
+        uint16_t firstLed = ((universe - UNIVERSE_START) * 170);
+        uint16_t lastLed  = firstLed + (maxChannels / 3);  // -1
+
+        #ifdef DEBUG
+          //Serial.printf("Universe %u / %u Channels | Packet#: %u / Errors: %u / FirstLed: %3u/ LastLed: %3u / CH1: %3u / CH2: %3u / CH3: %3u\n",
+          Serial.printf("Universe %u / %u Channels | Packet#: %u\n",
+                    universe,                               // The Universe for this packet
+                    maxChannels,                            // Start code is ignored, we're interested in dimmer data
+                    packet.sequence_number
+          //          e131->stats.num_packets//,                // Packet counter
+          //          e131->stats.packet_errors,              // Packet error counter
+          //          firstLed,                               // First LED to update
+          //          lastLed-1,                              // Last LED to update
+          //          packet.property_values[1],              // Dimmer data for Channel 1
+          //          packet.property_values[2],              // Dimmer data for Channel 2
+          //          packet.property_values[3]               // Dimmer data for Channel 3
+          );
+        #endif
+
+        int j = 1;
+        for (int i = firstLed; i < min(lastLed,(uint16_t)NUM_LEDS); i++)
+        {
+          // Calculate channel
+          m_Leds[i].setRGB(packet.property_values[j], packet.property_values[j + 1], packet.property_values[j + 2]);
+          j += 3;
+        }
+
+        //FastLED.setBrightness(255);
+        // Update only when data of the last universe of the strip comes in
+        if (universe == universeLast) FastLED.show();  
+        //FastLED.delay(1); // ToDo Needed or delete?
+      }
+    }
+    FastLED.delay(1);
+}
+#endif

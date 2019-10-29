@@ -23,6 +23,15 @@
 
 #include "config.h"
 
+#ifdef ENABLE_E131
+  #include <ESPAsyncE131.h>
+
+  #if (UNIVERSE_START < 1) || (UNIVERSE_START > 63999)
+    #error "UNIVERSE_START has to be 1 - 63999, check config.h"
+  #endif
+#endif
+
+
 class Effect
 {
 public:
@@ -578,4 +587,18 @@ private:
   uint8_t myfade;                                               // Starting brightness.
 
 
+};
+
+class EffectE131 : public Effect
+{
+  public:
+    EffectE131(CRGB leds[]);
+    virtual ~EffectE131();
+    void resetStripe() override;
+    void loop();
+    void setup();
+
+  private:
+    uint16_t universesRequired;
+    ESPAsyncE131* e131;
 };

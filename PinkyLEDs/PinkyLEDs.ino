@@ -10,7 +10,7 @@
  *      |         |   |      |   |   \         /     |       |_______  |_____/      \_____/ 
  *   \________________________________________/      |________________________________________/
  */
-#define VERSION "0.9.4dev"
+#define VERSION "0.9.5dev"
 
 #include <ArduinoJson.h>
 #ifdef ESP32
@@ -29,14 +29,6 @@
 
 #include <ArduinoOTA.h>
 
-#ifdef ENABLE_E131
-  #include <ESPAsyncE131.h>
-
-  #if (UNIVERSE_START < 1) || (UNIVERSE_START > 63999)
-    #error "UNIVERSE_START has to be 1 - 63999, check config.h"
-  #endif
-#endif
-
 #if defined(LED_BUILTIN) || defined(FORCE_USE_LED_BUILTIN)
   #define USE_LED_BUILTIN 1
 #endif
@@ -45,7 +37,13 @@
   #include <RotaryEncoder.h>
 #endif
 
-#define VERSION_FULL VERSION " " ARDUINO_VARIANT
+#ifdef ESP32
+  #define VERSION_FULL VERSION " " ARDUINO_VARIANT
+#elif defined(ESP8266)
+  #define VERSION_FULL VERSION " " ARDUINO_BOARD
+#else
+  #define VERSION_FULL VERSION
+#endif
 
 #ifdef ESP32
   #define LED_ON HIGH
@@ -193,11 +191,6 @@ uint8_t gHue = 0;
 
 long lastReconnectAttempt = 0;
 
-#ifdef ENABLE_E131
-  uint16_t universesRequired;
-  ESPAsyncE131* e131;
-#endif
-
 #ifdef DEBUG_MEM
   unsigned int debugTime;
 #endif
@@ -235,6 +228,9 @@ EffectRainbow        effectRainbow(leds);
 EffectGlitterRainbow effectGlitterRainbow(leds);
 EffectRipple         effectRipple(leds);
 EffectTwinkle        effectTwinkle(leds);
+#ifdef ENABLE_E131
+  EffectE131         effectE131(leds);
+#endif
 
 Effect* effectArray[] = {
                           &effectConfetti,
@@ -268,7 +264,11 @@ Effect* effectArray[] = {
                           &effectRainbow,
                           &effectGlitterRainbow,
                           &effectRipple,
-                          &effectTwinkle
+                          &effectTwinkle 
+                          #ifdef ENABLE_E131
+                          ,
+                          &effectE131
+                          #endif
 };
 
 
@@ -282,14 +282,17 @@ Effect* effectArray[] = {
     */
     
     uint numOfEffects = sizeof(effectArray)/sizeof(effectArray[0]);
-    #ifdef ENABLE_E131
-      numOfEffects++;
-    #endif
+
 
     const size_t capacity = JSON_OBJECT_SIZE(5)  +  // device
                             JSON_OBJECT_SIZE(18) +  // root
                             JSON_ARRAY_SIZE(numOfEffects)  +  // effect_list
                             39 + numOfEffects * 21;  // ToDo: max. length of an effect's name 20 chars + \0
+
+    #ifdef DEBUG
+      Serial.printf("SendDiscovery - capacity: %i\n", capacity);
+    #endif
+
     DynamicJsonBuffer jsonBuffer(capacity);
 
     JsonObject& root = jsonBuffer.createObject();
@@ -324,11 +327,7 @@ Effect* effectArray[] = {
       effect_list.add(effectArray[i]->GetEffectName());
     }
 
-    #ifdef ENABLE_E131
-      effect_list.add("E131");
-    #endif
-
-    int jsonBufferSize = root.measureLength();
+    int jsonBufferSize = root.measureLength()+1;
     char b[jsonBufferSize];
     #ifdef DEBUG
       Serial.printf("Discover JSON buffer size: %i\n", jsonBufferSize);
@@ -338,8 +337,8 @@ Effect* effectArray[] = {
 
     root.printTo(b, jsonBufferSize);
     
-    client.beginPublish(DISCOVERY_TOPIC,jsonBufferSize,true);
-    client.write((uint8_t*)b,jsonBufferSize);
+    client.beginPublish(DISCOVERY_TOPIC,jsonBufferSize-1,true);
+    client.write((uint8_t*)b,jsonBufferSize-1);
     client.endPublish();
     
   }
@@ -476,7 +475,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       else if ( newEffect == "Twinkle" )
         setEffect = eEffects::Twinkle;
       #ifdef ENABLE_E131
-      else if ( newEffect == "E131" )
+      else if ( newEffect == effectE131.GetEffectName() )
         setEffect = eEffects::E131;
       #endif
       #ifdef DEBUG
@@ -491,14 +490,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
         Serial.print("Effect Set: ");
         Serial.println(effectList[setEffect]);
       #endif
-      #ifdef ENABLE_E131
-        if (setEffect == eEffects::E131) {
-          FastLED.clear(true);
-          #ifdef DEBUG
-            Serial.println("LEDs Cleared.  Ready for E1.31");
-          #endif
-        }
-      #endif
+      
       if ((setEffect == eEffects::Twinkle) || (setEffect == eEffects::Lightning)) {
         twinklecounter = 0;
         #ifdef DEBUG
@@ -928,26 +920,18 @@ void setup()
   #endif
 
   #ifdef ENABLE_E131
-    if ( (NUM_LEDS % 170) > 0 ){
-      universesRequired = (NUM_LEDS / 170) + 1;
-    } else {
-      universesRequired = (NUM_LEDS / 170);
-    }
-    e131 = new ESPAsyncE131(universesRequired);
-    e131->begin(E131_UNICAST);
-    #ifdef DEBUG 
-      Serial.printf("E131 buffer initialised with %u Buffers\n", universesRequired); 
-    #endif
+    effectE131.setup();
   #endif
 
-  Serial.println("Effect's list:");
-  for (int i=0; i<32; i++)
-  {
-    Serial.print(i);
-    Serial.print(" - ");
-    Serial.println(effectArray[i]->GetEffectName());
-  }
-
+  #ifdef DEBUG
+    Serial.println("Effect's list:");
+    for (int i=0; i<sizeof(effectArray)/sizeof(effectArray[0]); i++)
+    {
+      Serial.print(i);
+      Serial.print(" - ");
+      Serial.println(effectArray[i]->GetEffectName());
+    }
+  #endif
 
 }
 
@@ -1002,52 +986,6 @@ void loop()
     }
   #endif
 
-#ifdef ENABLE_E131
-  if (setEffect == eEffects::E131 && setPower == "ON") {
-    #ifdef USE_LED_BUILTIN
-      digitalWrite(LED_BUILTIN, LED_ON);
-    #endif
-    if (!e131->isEmpty()) {
-      e131_packet_t packet;
-      e131->pull(&packet);     // Pull packet from ring buffer
-      
-      uint16_t universe = htons(packet.universe);
-      uint16_t universeLast = universe + universesRequired - 1;
-      uint16_t maxChannels = htons(packet.property_value_count) - 1;
-
-      if ( universe >= UNIVERSE_START ) 
-      {
-        // Calculate LED range to update
-        uint16_t firstLed = ((universe - UNIVERSE_START) * 170);
-        uint16_t lastLed  = firstLed + (maxChannels / 3);  // -1
-
-        #ifdef DEBUG
-          Serial.printf("Universe %u / %u Channels | Packet#: %u / Errors: %u / FirstLed: %3u/ LastLed: %3u / CH1: %3u / CH2: %3u / CH3: %3u\n",
-                    universe,                               // The Universe for this packet
-                    maxChannels,                            // Start code is ignored, we're interested in dimmer data
-                    e131->stats.num_packets,                // Packet counter
-                    e131->stats.packet_errors,              // Packet error counter
-                    firstLed,                               // First LED to update
-                    lastLed-1,                              // Last LED to update
-                    packet.property_values[1],              // Dimmer data for Channel 1
-                    packet.property_values[2],              // Dimmer data for Channel 2
-                    packet.property_values[3]);             // Dimmer data for Channel 3
-        #endif
-
-        int j = 1;
-        for (int i = firstLed; i < min(lastLed,(uint16_t)NUM_LEDS); i++)
-        {
-          // Calculate channel
-          leds[i].setRGB(packet.property_values[j], packet.property_values[j + 1], packet.property_values[j + 2]);
-          j += 3;
-        }
-
-        FastLED.setBrightness(255);
-        FastLED.show();
-      }
-    }
-  } else
-#endif
   {
     // Set colorpallet RGB values received to the effect that requires that
     Rcolor = setRed;
@@ -1220,6 +1158,16 @@ void loop()
           }
           effectTwinkle.loop();
           break;
+        #ifdef ENABLE_E131
+        case eEffects::E131:
+          // Resets strip if previous animation was running
+          if ( prevEffect != eEffects::E131 )
+          {
+            effectE131.resetStripe();
+          }
+          effectE131.loop();
+          break;
+        #endif
 
 
         default:
@@ -1241,7 +1189,7 @@ void loop()
       FastLED.clear(true);
     } else {
       FastLED.setBrightness(brightness);  //EXECUTE EFFECT COLOR
-      FastLED.show();
+      if (setEffect != eEffects::E131) FastLED.show();
     }
 
     // Set FastLED delay
@@ -1249,7 +1197,7 @@ void loop()
     {
       FastLED.delay(10);
     } 
-    else 
+/*    else 
     {
       if ((animationSpeed > 0) && (animationSpeed < 255))   //Sets animation speed based on receieved value
       {
@@ -1260,7 +1208,7 @@ void loop()
           FastLED.delay(1600);
       }
     }
-
+*/
     #ifdef DEBUG_MEM
     if ( millis() - debugTime > 5000 ) {
       Serial.print("FreeHeap: ");
